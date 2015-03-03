@@ -48,9 +48,8 @@ var calendar = document.querySelector(".b-calendar"),
     controls_date = controls.querySelector(".date"),
     goToday = calendar.querySelector(".goToday");
 
-selectDate.setDate(13);
 inputDate.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
-/*
+    /*
 inputDate.addEventListener("focus", function(){
 	calendar.style.display = "block";
 }, false);
@@ -63,17 +62,22 @@ function ShowCalendar (array) {
     if(table != null)
         calendar.removeChild(table);
 	table = document.createElement("table");
-	var	tableRow, tableCell, flag = true;
+	var	tableRow, tableCell, 
+        other_month = true,
+        other_month_position = "previous";
 	for (var i = 0; i < array.length; i++) {
 		tableRow = document.createElement("tr");
 		for (var j = 0; j < array[i].length; j++) {
 			tableCell = document.createElement(i == 0 ? "th" : "td");
 			tableCell.innerText = array[i][j];
-			if(array[i][j] == 1) flag = !flag;
-			if(flag && i != 0) tableCell.className = "other_month";
-            if(today.toString() == currentData.toString() && array[i][j] == today.getDate() && !flag) 
+			if(array[i][j] == 1) {
+                other_month = !other_month;
+                other_month_position = "next";
+            }
+			if(other_month && i != 0) tableCell.className = "other_month " + other_month_position;
+            if(!other_month && array[i][j] == today.getDate() && today.getMonth() == currentData.getMonth() && today.getFullYear() == currentData.getFullYear()) 
                 tableCell.className += " today";
-            if(selectDate.getMonth() == currentData.getMonth() && selectDate.getFullYear() == currentData.getFullYear() && array[i][j] == selectDate.getDate() && !flag) 
+            if(!other_month && array[i][j] == selectDate.getDate() && selectDate.getMonth() == currentData.getMonth() && selectDate.getFullYear() == currentData.getFullYear()) 
                 tableCell.className += " select";
 			tableRow.appendChild(tableCell);
 		};
@@ -101,6 +105,24 @@ function ShowMonth (date) {
     ShowCalendar(days);
 }
 
+function SelectDayByElement (el) {
+    var previousSelect = calendar.querySelector("td.select");
+    if(previousSelect)
+        previousSelect.className = previousSelect.className.replace(/\s?select/, "");
+    el.className += " select";
+    selectDate = new Date((currentData.getMonth() + 1) + "." + el.innerText + "." + currentData.getFullYear());
+    inputDate.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
+}
+
+function SelectDayByDate (date) {
+    var days = table.querySelectorAll("td:not(.other_month)");
+    for (var i = 0; i < days.length; i++)
+        if(days[i].innerText == date.getDate()){
+            SelectDayByElement(days[i]);
+            break;
+        }
+}
+
 ShowMonth(currentData);
 
 controls.addEventListener("click", function (e) {
@@ -119,18 +141,18 @@ goToday.addEventListener("click", function(){
     selectDate = new Date();
     currentData = new Date();
     ShowMonth(currentData);
+    SelectDayByDate(selectDate);
 }, false);
 
 calendar.addEventListener("click", function (e) {
     var el = e.target;
     if(el.tagName.toLowerCase() == "td"){
-        var previousSelect = calendar.querySelector("td.select");
-        if(previousSelect)
-            previousSelect.className = previousSelect.className.replace("select", "");
-        el.className += " select";
-        selectDate.setDate(el.innerText);
-        selectDate.setMonth(currentData.getMonth());
-        selectDate.setFullYear(currentData.getFullYear());
-        inputDate.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
+        if(el.className.search("other_month") != -1){
+            currentData.setMonth(currentData.getMonth() + (el.className.search("previous") != -1 ? -1 : 1));
+            selectDate = new Date(currentData.getFullYear() + " " + (currentData.getMonth() + 1) + " " + el.innerText);
+            ShowMonth(currentData);
+            SelectDayByDate(selectDate);
+        }
+        else SelectDayByElement(el);
     }
 }, false);
