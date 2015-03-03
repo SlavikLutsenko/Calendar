@@ -33,9 +33,6 @@ input.calendar{
 	display: block;
 	width: 330px;
 	font-family: Lato;
-}
-
-.b-calendar{
 	background: #323439;
 	padding: 0.1px 0;
 }
@@ -126,6 +123,8 @@ input.calendar{
 }
 
 .b-calendar .calendar{
+	width: 270px;
+	min-height: 270px;
 	margin: 20px auto;
 	color: #fff;
 	border-color: #fff;
@@ -151,38 +150,67 @@ input.calendar{
 	text-align: center;
 }
 
-.b-calendar .calendar td{
+.b-calendar .calendar td,
+.b-calendar .calendar td.month span,
+.b-calendar .calendar td.year span{
 	cursor: pointer;
 	transition: box-shadow 0.3s ease, 
 				border-radius 0.3s ease,
 				background 0.3s ease;
 }
 
-.b-calendar .calendar td:not(.select):hover{
+.b-calendar .calendar td.month span,
+.b-calendar .calendar td.year span{
+	display: inline-block;
+	padding: 4px 10px;
+}
+
+.b-calendar .calendar td:not(.select):not(.month):not(.year):hover,
+.b-calendar .calendar td.month span:hover,
+.b-calendar .calendar td.year span:hover{
+	background: #323439;
 	box-shadow: inset 0 0 0 20px #222;
 	border-radius: 50%;
 }
 
-.b-calendar .calendar td:active{
+.b-calendar .calendar td.month span:hover,
+.b-calendar .calendar td.year span:hover{
+	border-radius: 20px;
+	background: #323439 !important;
+}
+
+.b-calendar .calendar td:not(.month):not(.year):active,
+.b-calendar .calendar td.month span:active,
+.b-calendar .calendar td.year span:active{
 	box-shadow: inset 0 0 0 0 #222 !important;
-	background: #e8736f;
+	background: #e8736f !important;
+	border-radius: 50%;
 }
 
 .b-calendar .calendar .other_month{
 	color: #838487;
 }
 
-.b-calendar .calendar .select{
+.b-calendar .calendar .select:not(.month):not(.year),
+.b-calendar .calendar td.month.select span,
+.b-calendar .calendar td.year.select span
+{
 	background: #e8736f;
 	font-family: Lato-Regular;
 	border-radius: 50%;
+}
+
+.b-calendar .calendar td.month span:hover,
+.b-calendar .calendar td.month.select span,
+.b-calendar .calendar td.year span:hover,
+.b-calendar .calendar td.year.select span{
+	border-radius: 20px;
 }
 
 .b-calendar .calendar .today{
 	border-radius: 50%;
 	box-shadow: inset 0 0 0 1px #e8736f;
 }
-
 
 
 
