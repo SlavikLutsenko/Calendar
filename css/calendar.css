@@ -1,0 +1,174 @@
+@font-face {
+	font-family: Lato;
+	src: url(fonts/Lato-Light.ttf);
+}
+
+*{
+	padding: 0;
+	margin: 0;
+	outline: none;
+}
+
+body{
+	background: #e6e6e8;
+}
+
+.b-calendar{
+	width: 330px;
+	font-family: Lato;
+}
+
+.b-calendar > .today{
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 5px;
+	padding: 14px 17px;
+	background: #fff;
+	color: #323439;
+	font-size: 18px;
+	font-family: inherit;
+}
+
+.b-calendar .calendar{
+	background: #323439;
+	padding: 0.1px 0;
+}
+
+.b-calendar .calendar .b-controls{
+	background: #5a5b5f;
+	color: #fff;
+	font-size: 18px;
+	overflow: hidden;
+}
+
+.b-calendar .calendar .b-controls .button:not(.date){
+	height: 50px;
+	width: 50px;
+	position: relative;
+	
+}
+
+.b-calendar .calendar .b-controls .button{
+	float: left;
+	cursor: pointer;
+}
+
+.b-calendar .calendar .b-controls .button.date{
+	padding: 14px 0;
+	text-align: center;
+	width: 230px;
+}
+
+.b-calendar .calendar .b-controls .button:hover{
+	background: #333;
+	transition: background .5s ease;	
+}
+
+.b-calendar .calendar .b-controls .button.left:after,
+.b-calendar .calendar .b-controls .button.left:before,
+.b-calendar .calendar .b-controls .button.right:after,
+.b-calendar .calendar .b-controls .button.right:before{
+	content: "";
+	width: 0;
+	height: 0;
+	position: absolute;
+	top: 9px;
+	border: 16px solid transparent;
+}
+
+.b-calendar .calendar .b-controls .button.left:after,
+.b-calendar .calendar .b-controls .button.left:before{
+	border-left: 0;
+}
+
+.b-calendar .calendar .b-controls .button.left:after{
+	left: 14px;
+	border-right-color: #a0a0a2;  
+	z-index: 10;
+}
+
+.b-calendar .calendar .b-controls .button.left:before{
+	left: 16px;
+	border-right-color: #5a5b5f;  
+	z-index: 100;
+}
+
+.b-calendar .calendar .b-controls .button:hover.left:before{
+	border-right-color: #333;
+	transition: border-right-color .5s ease;
+}
+
+.b-calendar .calendar .b-controls .button.right:after,
+.b-calendar .calendar .b-controls .button.right:before{
+	border-right: 0;
+}
+
+.b-calendar .calendar .b-controls .button.right:after{
+	right: 14px;
+	border-left-color: #a0a0a2;  
+	z-index: 10;
+}
+
+.b-calendar .calendar .b-controls .button.right:before{
+	right: 16px;
+	border-left-color: #5a5b5f;  
+	z-index: 100;
+}
+
+.b-calendar .calendar .b-controls .button:hover.right:before{
+	border-left-color: #333;
+	transition: border-left-color .5s ease;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.b-calendar .calendar .goToday{
+	width: 135px;
+	display: block;
+	font-size: 16px;
+	font-family: inherit;
+	color: #fff;
+	background: #282a2d;
+	border: none;
+	border-radius: 70px;
+	padding: 5px 0 7px;
+	margin: 20px auto 25px;
+	cursor: pointer;
+}
+
+.b-calendar .calendar .goToday:hover{
+	background: #ddd;
+	color: #333;
+	transition: background .5s ease, color .5s ease;
+}
