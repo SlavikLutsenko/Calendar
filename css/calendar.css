@@ -29,8 +29,38 @@ input.calendar{
 	font-family: Lato;	
 }
 
+.wrapper_input_calendar{
+	position: relative;
+	display: inline-block;
+}
+
+.wrapper_input_calendar label{
+	position: absolute;
+	background: #d5d5d6;
+	cursor: pointer;
+	width: 27px;
+	height: 24px;
+	top: 14px;
+	right: 15px;
+	transition: background .5s ease;
+}
+
+.wrapper_input_calendar label:hover{
+	background: #5a5b5f;
+}
+
+.wrapper_input_calendar label:after{
+	content: "";
+	position: absolute;
+	height: 17px;
+	width: 23px;
+	top: 5px;
+	left: 2px;
+	background: #fff;
+}
+
 .b-calendar{
-	display: block;
+	display: none;
 	width: 330px;
 	font-family: Lato;
 	background: #323439;

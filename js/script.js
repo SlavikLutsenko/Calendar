@@ -47,64 +47,48 @@ var calendar = document.querySelector(".b-calendar"),
 	controls = calendar.querySelector(".b-controls"),
     controls_date = controls.querySelector(".date"),
     goToday = calendar.querySelector(".goToday"),
-    state = "days";
+    state = "days",
+    button_show_calendar = document.querySelector(".wrapper_input_calendar label");
 
 inputDate.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
-    /*
-inputDate.addEventListener("focus", function(){
-	calendar.style.display = "block";
-}, false);
-
-inputDate.addEventListener("blur", function(){
-	calendar.style.display = "none";
-}, false);
-*/
-function ShowCalendarDay (days) {
-    if(table != null)
-        calendar.removeChild(table);
-	table = document.createElement("table");
-	var	tableRow, tableCell, 
-        other_month = true,
-        other_month_position = "previous";
-	for (var i = 0; i < days.length; i++) {
-		tableRow = document.createElement("tr");
-		for (var j = 0; j < days[i].length; j++) {
-			tableCell = document.createElement(i == 0 ? "th" : "td");
-			tableCell.innerText = days[i][j];
-			if(days[i][j] == 1) {
-                other_month = !other_month;
-                other_month_position = "next";
-            }
-            tableCell.className = "day";
-			if(other_month && i != 0) tableCell.className += " other_month " + other_month_position;
-            if(!other_month && days[i][j] == today.getDate() && today.getMonth() == currentData.getMonth() && today.getFullYear() == currentData.getFullYear()) 
-                tableCell.className += " today";
-            if(!other_month && days[i][j] == selectDate.getDate() && selectDate.getMonth() == currentData.getMonth() && selectDate.getFullYear() == currentData.getFullYear()) 
-                tableCell.className += " select";
-			tableRow.appendChild(tableCell);
-		};
-		table.appendChild(tableRow);
-	};
-	table.className = "calendar";
-	calendar.insertBefore(table, calendar.lastElementChild);
-}
 
 function ShowMonth (date) {
     controls_date.innerText = months[date.getMonth()].name + " " + date.getFullYear();
-    var days = new Array(7),
-        date = new Date(months[date.getMonth()].name + " " + date.getFullYear());
-    days[0] = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-    for (var i = 1; i < days.length; i++)
-        days[i] = new Array(7);
+    if(table != null)
+        calendar.removeChild(table);
+    table = document.createElement("table");
+    var tableRow, tableCell,
+        name_days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+    date = new Date(date);
+    date.setDate(1);
     for (var i = 0, end = date.getDay() == 0 ? 7 : date.getDay(); i < end; i++)
         date.setDate(date.getDate() - 1);
-    for (var i = 1; i < days.length; i++) {
-        for (var j = 0; j < days[i].length; j++) {
-            days[i][j] = date.getDate();
+    tableRow = document.createElement("tr");
+    for (var i = 0; i < name_days.length; i++) {
+        tableCell = document.createElement("th");
+        tableCell.innerText = name_days[i];
+        tableRow.appendChild(tableCell);
+    };
+    table.appendChild(tableRow);
+    for (var i = 0; i < 6; i++) {
+        tableRow = document.createElement("tr");
+        for (var j = 0; j < 7; j++) {
+            tableCell = document.createElement("td");
+            tableCell.innerText = date.getDate();
+            tableCell.className = "day";
+            if(date.getMonth() != currentData.getMonth()) 
+                tableCell.className += " other_month " + (date.getMonth() < currentData.getMonth() ? "previous" : "next");
+            if(date.toLocaleDateString() == today.toLocaleDateString()) 
+                tableCell.className += " today";
+            if(date.toLocaleDateString() == selectDate.toLocaleDateString())
+                tableCell.className += " select";
+            tableRow.appendChild(tableCell);
             date.setDate(date.getDate() + 1);
         };
+        table.appendChild(tableRow);
     };
-    ShowCalendarDay(days);
+    table.className = "calendar";
+    calendar.insertBefore(table, calendar.lastElementChild);
     state = "days";
 }
 
@@ -245,3 +229,21 @@ calendar.addEventListener("click", function (e) {
         ShowMonths();
     }
 }, false);
+
+button_show_calendar.addEventListener("click", function () {
+    calendar.style.display = "block";
+}, false);
+
+document.body.addEventListener("click", function (e) {
+    var el = e.target;
+    while(el != document.body && el != calendar && el != inputDate)
+        el = el.parentNode;
+    if(el == document.body)
+        calendar.style.display = "none";
+}, true);
+
+inputDate.addEventListener("change", function () {
+    selectDate = new Date((inputDate.value.split(" ").length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+    ShowMonth(selectDate);
+    SelectDayByDate(selectDate);
+}, false)
