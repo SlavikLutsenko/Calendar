@@ -60,11 +60,29 @@ function Calendar () {
     inputDate = wrapper_input_calendar.querySelector("input.calendar");
     inputDate.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
 
-    var calendar = document.querySelector(".b-calendar"),
-        show_calendar = calendar.querySelector(".show_calendar")
-        controls = calendar.querySelector(".b-controls"),
-        controls_date = controls.querySelector(".date"),
-        goToday = calendar.querySelector(".goToday");
+    var calendar = document.createElement("div"),
+        show_calendar = document.createElement("div"),
+        controls = document.createElement("div"),
+        controls_date = document.createElement("div"),
+        goToday = document.createElement("button"),
+        tempEl = document.createElement("div");
+
+    tempEl.className = "button left";
+    controls.appendChild(tempEl);
+    controls_date.className = "button date";
+    controls.appendChild(controls_date);
+    tempEl = document.createElement("div");
+    tempEl.className = "button right";
+    controls.appendChild(tempEl);
+    controls.className = "b-controls";
+    calendar.appendChild(controls);
+    show_calendar.className = "show_calendar";
+    calendar.appendChild(show_calendar);
+    goToday.className = "goToday";
+    goToday.innerText = "Today";
+    calendar.appendChild(goToday);
+    calendar.className = "b-calendar";
+    document.body.appendChild(calendar);
 
     function Transform (el, opacity, scale) {
         el.style.opacity = opacity;
@@ -111,7 +129,7 @@ function Calendar () {
         currentData = new Date(date);
         controls_date.innerText = months[date.getMonth()].name + " " + date.getFullYear();
         var newtable = CreateMonth(date);
-        if(state == "months"){
+        if(state != "days"){
             Transform(table, 0, 2);
             newtable.style.transform = "scale(0.5)";
             show_calendar.appendChild(newtable);
@@ -317,10 +335,10 @@ function Calendar () {
 
     goToday.addEventListener("click", function(){
         var flag = currentData.getMonth() != today.getMonth() || currentData.getFullYear() != today.getFullYear();
-        if(flag)
+        if(flag || state != "days")
             ShowMonth(new Date(), (currentData.getFullYear() < today.getFullYear() || currentData.getMonth() < today.getMonth() ? "right" : "left"));
         selectDate = new Date();
-        if(flag)
+        if(flag || state != "days")
             setTimeout(function(){
                 SelectDayByDate(selectDate);
             }, 300);
