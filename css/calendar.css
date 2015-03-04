@@ -165,12 +165,21 @@ input.calendar{
 
 .b-calendar .calendar{
 	width: 270px;
+	position: absolute;
+	top: 50px;
+	left: 30px;
 	min-height: 270px;
 	margin: 20px auto;
 	color: #fff;
 	border-color: #fff;
 	border-collapse: collapse;
-	transition: left 1s ease, right 1s ease;
+	opacity: 1;
+	transform: scale(1);
+	-webkit-transform: scale(1);
+	transition: left 0.3s ease, 
+				right 0.3s ease,
+				transform 0.3s ease,
+				opacity 0.3s ease;
 }
 
 .b-calendar .calendar th{

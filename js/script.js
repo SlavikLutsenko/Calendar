@@ -3,7 +3,6 @@ function GetPositionElement(el) {
     return {top: position.top, left: position.left}
 }
 
-
 function Calendar () {
     var months = new Array(
             {
@@ -50,7 +49,8 @@ function Calendar () {
         selectDate = new Date(),
         table = null,
         state = "days",
-        wrapper_input_calendar = document.createElement("span");
+        wrapper_input_calendar = document.createElement("span"),
+        number_showed = 0;
 
     wrapper_input_calendar.className = "wrapper_input_calendar";
     wrapper_input_calendar.innerHTML = inputDate.outerHTML;
@@ -64,7 +64,12 @@ function Calendar () {
         show_calendar = calendar.querySelector(".show_calendar")
         controls = calendar.querySelector(".b-controls"),
         controls_date = controls.querySelector(".date"),
-        goToday = calendar.querySelector(".goToday")
+        goToday = calendar.querySelector(".goToday");
+
+    function Transform (el, opacity, scale) {
+        el.style.opacity = opacity;
+        el.style.transform = "scale(" + scale + ")";
+    }
 
     function CreateMonth (date) {
         var month = document.createElement("table");
@@ -102,13 +107,41 @@ function Calendar () {
         return month;
     }
 
-    function ShowMonth (date) {
-        controls_date.innerText = months[date.getMonth()].name + " " + date.getFullYear();
-        if(table != null)
-            show_calendar.removeChild(table);
-        table = CreateMonth(date);
-        show_calendar.appendChild(table);
+    function ShowMonth (date, direction) {
         currentData = new Date(date);
+        controls_date.innerText = months[date.getMonth()].name + " " + date.getFullYear();
+        var newtable = CreateMonth(date);
+        if(state == "months"){
+            Transform(table, 0, 2);
+            newtable.style.transform = "scale(0.5)";
+            show_calendar.appendChild(newtable);
+            setTimeout(function(){
+                Transform(newtable, 1, 1);
+            }, 10)
+            setTimeout(function(){
+                if(table != null)
+                    show_calendar.removeChild(table);
+                table = newtable;
+            }, 300);
+        }else{
+            if(number_showed == 0)
+                number_showed++;
+            else newtable.style.left = (direction == "right" ? 1 : -1)*100*number_showed++ + "%";
+            show_calendar.appendChild(newtable);
+            if(table != null){
+                setTimeout(function () {
+                    newtable.style.left = "30px";
+                    table.style.left = (direction == "right" ? -1 : 1)*100 + "%";
+                }, 10)
+                setTimeout(function () {
+                    if(table != null)
+                        show_calendar.removeChild(table);
+                    table = newtable;
+                    if(number_showed != 1)
+                        number_showed--;
+                }, 300)
+            }else table = newtable;
+        }
         state = "days";
     }
 
@@ -130,17 +163,14 @@ function Calendar () {
             }
     }
 
-    function ShowMonths () {
-        controls_date.innerText = currentData.getFullYear();
+    function CreateMonths () {
         var months = [
             ["Jan", "Feb", "Mar"],
             ["Apr", "May", "Jun"],
             ["Jul", "Aug", "Sep"],
             ["Oct", "Nov", "Dec"]
         ];
-        if(table != null)
-            show_calendar.removeChild(table);
-        table = document.createElement("table");
+        var table_months = document.createElement("table");
         var tableRow, tableCell, el;
         for (var i = 0, numberMonth = 0; i < months.length; i++) {
             tableRow = document.createElement("tr");
@@ -155,18 +185,46 @@ function Calendar () {
                     tableCell.className += " select";
                 tableRow.appendChild(tableCell);
             };
-            table.appendChild(tableRow);
+            table_months.appendChild(tableRow);
         };
-        table.className = "calendar";
-        show_calendar.appendChild(table);
+        table_months.className = "calendar";
+        return table_months;
+    }
+
+    function ShowMonths (direction) {
+        controls_date.innerText = currentData.getFullYear();
+        var newtable = CreateMonths();
+        if(state == "days"){
+            Transform(table, 0, 0.5);
+            newtable.style.transform = "scale(2)";
+            show_calendar.appendChild(newtable);
+            setTimeout(function(){
+                Transform(newtable, 1, 1);
+            }, 10)
+            setTimeout(function(){
+                if(table != null)
+                    show_calendar.removeChild(table);
+                table = newtable;
+            }, 300);
+        }
+        if(state == "years"){
+            Transform(table, 0, 2);
+            newtable.style.transform = "scale(0.5)";
+            show_calendar.appendChild(newtable);
+            setTimeout(function(){
+                Transform(newtable, 1, 1);
+            }, 10)
+            setTimeout(function(){
+                if(table != null)
+                    show_calendar.removeChild(table);
+                table = newtable;
+            }, 300);
+        }
         state = "months";
     }
 
-    function ShowYears (startYear, finishYear) {
-        controls_date.innerText = startYear + " - " + finishYear;
-        if(table != null)
-            show_calendar.removeChild(table);
-        table = document.createElement("table");
+    function CreateYears (startYear, finishYear) {
+        var years = document.createElement("table");
         var tableRow, tableCell, el;
         for (var i = startYear, end = startYear + 4; i <= finishYear; end += 4) {
             tableRow = document.createElement("tr");
@@ -181,11 +239,46 @@ function Calendar () {
                     tableCell.className += " select";
                 tableRow.appendChild(tableCell);
             };
-            table.appendChild(tableRow);
+            years.appendChild(tableRow);
         };
-        table.className = "calendar";
-        show_calendar.appendChild(table);
-        state = "years";
+        years.className = "calendar";
+        return years;
+    }
+
+    function ShowYears (startYear, finishYear, direction) {
+        controls_date.innerText = startYear + " - " + finishYear;
+        var newtable = CreateYears(startYear, finishYear);
+        if(direction == "show"){
+            Transform(table, 0, 0.5);
+            newtable.style.transform = "scale(2)";
+            show_calendar.appendChild(newtable);
+            setTimeout(function(){
+                Transform(newtable, 1, 1);
+            }, 10)
+            setTimeout(function(){
+                if(table != null)
+                    show_calendar.removeChild(table);
+                table = newtable;
+                state = "years";
+            }, 300);
+        }else{
+            if(number_showed == 0)
+                number_showed++;
+            else newtable.style.left = (direction == "right" ? 1 : -1)*100*number_showed++ + "%";
+            show_calendar.appendChild(newtable);
+            setTimeout(function () {
+                newtable.style.left = "30px";
+                table.style.left = (direction == "right" ? -1 : 1)*100 + "%";
+            }, 10)
+            setTimeout(function () {
+                if(table != null)
+                    show_calendar.removeChild(table);
+                table = newtable;
+                if(number_showed != 1)
+                    number_showed--;
+                state = "years";
+            }, 300)
+        }
     }
 
     ShowMonth(currentData);
@@ -205,7 +298,7 @@ function Calendar () {
                 case "years":
                     var borders = controls_date.innerText.split(" - "),
                         multiplier = el.className.search("left") != -1 ? -1 : 1;
-                    ShowYears(Number(borders[0]) + 16*multiplier, Number(borders[1]) + 16*multiplier);
+                    ShowYears(Number(borders[0]) + 16*multiplier, Number(borders[1]) + 16*multiplier, (el.className.search("left") != -1 ? "left" : "right"));
                     break;
             }
         }
@@ -215,7 +308,7 @@ function Calendar () {
                     ShowMonths();
                     break;
                 case "months":
-                    ShowYears(currentData.getFullYear() - 7, currentData.getFullYear() + 8);
+                    ShowYears(currentData.getFullYear() - 7, currentData.getFullYear() + 8, "show");
                     break;
             }
             
@@ -223,12 +316,16 @@ function Calendar () {
     }, false);
 
     goToday.addEventListener("click", function(){
-        if(currentData.getMonth() != today.getMonth() || currentData.getFullYear() != today.getFullYear()){
-            currentData = new Date();
-            ShowMonth(currentData);
-        }
+        var flag = currentData.getMonth() != today.getMonth() || currentData.getFullYear() != today.getFullYear();
+        if(flag)
+            ShowMonth(new Date(), (currentData.getFullYear() < today.getFullYear() || currentData.getMonth() < today.getMonth() ? "right" : "left"));
         selectDate = new Date();
-        SelectDayByDate(selectDate);
+        if(flag)
+            setTimeout(function(){
+                SelectDayByDate(selectDate);
+            }, 300);
+        else
+            SelectDayByDate(selectDate);
     }, false);
 
     calendar.addEventListener("click", function (e) {
@@ -237,7 +334,7 @@ function Calendar () {
             if(el.className.search("other_month") != -1){
                 currentData.setMonth(currentData.getMonth() + (el.className.search("previous") != -1 ? -1 : 1));
                 selectDate = new Date(currentData.getFullYear() + " " + (currentData.getMonth() + 1) + " " + el.innerText);
-                ShowMonth(currentData);
+                ShowMonth(currentData, (el.className.search("next") != -1 ? "right" : "left"));
                 SelectDayByDate(selectDate);
             }
             else SelectDayByElement(el);
@@ -269,7 +366,8 @@ function Calendar () {
 
     inputDate.addEventListener("change", function () {
         selectDate = new Date((inputDate.value.split(" ").length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-        ShowMonth(selectDate);
+        if(selectDate.getMonth() != currentData.getMonth() || selectDate.getFullYear() != currentData.getFullYear()) 
+            ShowMonth(selectDate, (currentData.getFullYear() < selectDate.getFullYear() || currentData.getMonth() < selectDate.getMonth() ? "right" : "left"));
         SelectDayByDate(selectDate);
     }, false)
 }
