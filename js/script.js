@@ -42,6 +42,7 @@ var calendar = document.querySelector(".b-calendar"),
 	today = new Date(),
     currentData = new Date(),
     selectDate = new Date(),
+    show_calendar = calendar.querySelector(".show_calendar")
     table = null,
 	inputDate = document.querySelector("input.calendar"),
 	controls = calendar.querySelector(".b-controls"),
@@ -55,7 +56,7 @@ inputDate.value = months[selectDate.getMonth()].name + " " + selectDate.getDate(
 function ShowMonth (date) {
     controls_date.innerText = months[date.getMonth()].name + " " + date.getFullYear();
     if(table != null)
-        calendar.removeChild(table);
+        show_calendar.removeChild(table);
     table = document.createElement("table");
     var tableRow, tableCell,
         name_days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
@@ -88,7 +89,7 @@ function ShowMonth (date) {
         table.appendChild(tableRow);
     };
     table.className = "calendar";
-    calendar.insertBefore(table, calendar.lastElementChild);
+    show_calendar.appendChild(table);
     state = "days";
 }
 
@@ -119,7 +120,7 @@ function ShowMonths () {
         ["Oct", "Nov", "Dec"]
     ];
     if(table != null)
-        calendar.removeChild(table);
+        show_calendar.removeChild(table);
     table = document.createElement("table");
     var tableRow, tableCell, el;
     for (var i = 0, numberMonth = 0; i < months.length; i++) {
@@ -138,14 +139,14 @@ function ShowMonths () {
         table.appendChild(tableRow);
     };
     table.className = "calendar";
-    calendar.insertBefore(table, calendar.lastElementChild);
+    show_calendar.appendChild(table);
     state = "months";
 }
 
 function ShowYears (startYear, finishYear) {
     controls_date.innerText = startYear + " - " + finishYear;
     if(table != null)
-        calendar.removeChild(table);
+        show_calendar.removeChild(table);
     table = document.createElement("table");
     var tableRow, tableCell, el;
     for (var i = startYear, end = startYear + 4; i <= finishYear; end += 4) {
@@ -164,7 +165,7 @@ function ShowYears (startYear, finishYear) {
         table.appendChild(tableRow);
     };
     table.className = "calendar";
-    calendar.insertBefore(table, calendar.lastElementChild);
+    show_calendar.appendChild(table);
     state = "years";
 }
 
@@ -176,7 +177,7 @@ controls.addEventListener("click", function (e) {
         switch(state){
             case "days":
                 currentData.setMonth(currentData.getMonth() + (el.className.search("left") != -1 ? -1 : 1));
-                ShowMonth(currentData);
+                ShowMonth(currentData, (el.className.search("left") != -1 ? "left" : "right"));
                 break;
             case "months":
                 currentData.setFullYear(currentData.getFullYear() + (el.className.search("left") != -1 ? -1 : 1));
@@ -203,9 +204,11 @@ controls.addEventListener("click", function (e) {
 }, false);
 
 goToday.addEventListener("click", function(){
+    if(currentData.getMonth() != today.getMonth() || currentData.getFullYear() != today.getFullYear()){
+        currentData = new Date();
+        ShowMonth(currentData);
+    }
     selectDate = new Date();
-    currentData = new Date();
-    ShowMonth(currentData);
     SelectDayByDate(selectDate);
 }, false);
 
@@ -230,7 +233,7 @@ calendar.addEventListener("click", function (e) {
     }
 }, false);
 
-button_show_calendar.addEventListener("click", function () {
+/*button_show_calendar.addEventListener("click", function () {
     calendar.style.display = "block";
 }, false);
 
@@ -240,7 +243,7 @@ document.body.addEventListener("click", function (e) {
         el = el.parentNode;
     if(el == document.body)
         calendar.style.display = "none";
-}, true);
+}, true);*/
 
 inputDate.addEventListener("change", function () {
     selectDate = new Date((inputDate.value.split(" ").length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);

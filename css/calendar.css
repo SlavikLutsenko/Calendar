@@ -60,11 +60,13 @@ input.calendar{
 }
 
 .b-calendar{
-	display: none;
+	overflow: hidden;
+	display: block;
 	width: 330px;
 	font-family: Lato;
 	background: #323439;
 	padding: 0.1px 0;
+	position: relative;
 }
 
 .b-calendar .b-controls{
@@ -152,6 +154,11 @@ input.calendar{
 	transition: border-left-color .5s ease;
 }
 
+.b-calendar .show_calendar{
+	height: 300px;
+	overflow: hidden;
+}
+
 .b-calendar .calendar{
 	width: 270px;
 	min-height: 270px;
@@ -159,6 +166,7 @@ input.calendar{
 	color: #fff;
 	border-color: #fff;
 	border-collapse: collapse;
+	transition: left 1s ease, right 1s ease;
 }
 
 .b-calendar .calendar th{
@@ -228,6 +236,7 @@ input.calendar{
 	background: #e8736f;
 	font-family: Lato-Regular;
 	border-radius: 50%;
+	color: #fff !important;
 }
 
 .b-calendar .calendar td.month span:hover,
@@ -262,7 +271,7 @@ input.calendar{
 	border: none;
 	border-radius: 70px;
 	padding: 5px 0 7px;
-	margin: 20px auto 25px;
+	margin: 0px auto 20px;
 	cursor: pointer;
 }
 
