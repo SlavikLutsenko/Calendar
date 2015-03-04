@@ -26,12 +26,14 @@ input.calendar{
 	background: #fff;
 	color: #323439;
 	font-size: 18px;
-	font-family: Lato;	
+	font-family: Lato;
+	margin: 100px;	
+	border: none;
 }
 
 .wrapper_input_calendar{
 	position: relative;
-	display: inline-block;
+	display: inline;
 }
 
 .wrapper_input_calendar label{
@@ -40,8 +42,10 @@ input.calendar{
 	cursor: pointer;
 	width: 27px;
 	height: 24px;
-	top: 14px;
-	right: 15px;
+	top: 50%;
+	right: 50%;
+	margin-top: -14px;
+	margin-right: -150px;
 	transition: background .5s ease;
 }
 
@@ -61,12 +65,12 @@ input.calendar{
 
 .b-calendar{
 	overflow: hidden;
-	display: block;
+	display: none;
 	width: 330px;
 	font-family: Lato;
 	background: #323439;
 	padding: 0.1px 0;
-	position: relative;
+	position: absolute;
 }
 
 .b-calendar .b-controls{
