@@ -85,13 +85,29 @@ function Calendar () {
 
 	for (var i = 0; i < inputsDate.length; i++) {
 		inputsDate[i].addEventListener("change", function () {
-	        selectDate = new Date((inputDate.value.split(" ").length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-	        if(selectDate.getMonth() != currentData.getMonth() || selectDate.getFullYear() != currentData.getFullYear()) 
-	            ShowMonth(selectDate, (currentData.getFullYear() < selectDate.getFullYear() || currentData.getMonth() < selectDate.getMonth() ? "right" : "left"));
-	        SelectDayByDate(selectDate);
-	    }, false)
+	        selectDate = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+	        if(calendar.style.display != "none"){
+	        	if(selectDate.getMonth() != currentData.getMonth() || selectDate.getFullYear() != currentData.getFullYear()) 
+		            ShowMonth(selectDate, (currentData.getFullYear() < selectDate.getFullYear() || currentData.getMonth() < selectDate.getMonth() ? "right" : "left"));
+		        SelectDayByDate(selectDate);
+	        }
+	    }, false);
+
+	    inputsDate[i].addEventListener("focus", function (e) {
+	        var el = e.target;
+	    	inputDate = el;
+	    	selectDate = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+	        el.value = selectDate.toLocaleDateString();
+	    }, false);
+
+	    inputsDate[i].addEventListener("blur", function (e) {
+	        var el = e.target,
+	        	date = el.value.split(/\.|\s/);
+	    	selectDate = new Date(date[1] + "." + date[0] + "." + date[2]);
+	        el.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
+	    }, false);
 	};
-	
+
 	function ShowCalendar (el) {
 		inputDate = el;
 		var position = GetPositionElement(inputDate);
@@ -99,8 +115,8 @@ function Calendar () {
 		calendar.style.top = position.top + 55 + "px";
 		calendar.style.left = position.left + "px";
 		calendar.style.display = "block";
-		selectDate = new Date((inputDate.value.split(" ").length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-		currentData = new Date((inputDate.value.split(" ").length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+		selectDate = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+		currentData = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
 		number_showed = 0;
 		ShowMonth(currentData);
 	}
@@ -407,6 +423,7 @@ function Calendar () {
 			if(table != null)
 				show_calendar.removeChild(table);
 			table = null;
+			state = "days";
 			var select_calendar = document.querySelector(".select_calendar");
 			if(select_calendar != null)
 				select_calendar.className = select_calendar.className.replace(/\s?select_calendar/, "");
