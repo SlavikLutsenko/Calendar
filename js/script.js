@@ -85,7 +85,7 @@ function Calendar () {
 
 	for (var i = 0; i < inputsDate.length; i++) {
 		inputsDate[i].addEventListener("change", function () {
-	        selectDate = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+	        selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
 	        if(calendar.style.display != "none"){
 	        	if(selectDate.getMonth() != currentData.getMonth() || selectDate.getFullYear() != currentData.getFullYear()) 
 		            ShowMonth(selectDate, (currentData.getFullYear() < selectDate.getFullYear() || currentData.getMonth() < selectDate.getMonth() ? "right" : "left"));
@@ -96,13 +96,13 @@ function Calendar () {
 	    inputsDate[i].addEventListener("focus", function (e) {
 	        var el = e.target;
 	    	inputDate = el;
-	    	selectDate = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+	    	selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
 	        el.value = selectDate.toLocaleDateString();
 	    }, false);
 
 	    inputsDate[i].addEventListener("blur", function (e) {
 	        var el = e.target,
-	        	date = el.value.split(/\.|\s/);
+	        	date = el.value.split(/\.|\s|\//);
 	    	selectDate = new Date(date[1] + "." + date[0] + "." + date[2]);
 	        el.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
 	    }, false);
@@ -115,8 +115,8 @@ function Calendar () {
 		calendar.style.top = position.top + 55 + "px";
 		calendar.style.left = position.left + "px";
 		calendar.style.display = "block";
-		selectDate = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-		currentData = new Date((inputDate.value.split(/\.|\s/).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+		selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+		currentData = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
 		number_showed = 0;
 		ShowMonth(currentData);
 	}
