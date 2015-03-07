@@ -73,11 +73,17 @@ function Calendar () {
 	goToday.innerText = "Today";
 	calendar.appendChild(goToday);
 	calendar.className = "b-calendar";
+	calendar.style.display = "none";
 	document.body.appendChild(calendar);
 
 	for (var i = 0; i < inputsDate.length; i++) {
 		Wrapper(inputsDate[i]).addEventListener("click", function (e) {
-			ShowCalendar(e.target.previousElementSibling);
+			if(e.target.previousElementSibling.className.search("select_calendar") == -1){
+				HideCalendar();
+				ShowCalendar(e.target.previousElementSibling);
+			}
+			else
+				HideCalendar();
 		}, false);
 	};
 
@@ -348,36 +354,41 @@ function Calendar () {
 		}
 	}
 
+	function Move (direction) {
+		switch(state){
+			case "days":
+				currentData.setMonth(currentData.getMonth() + (direction == "left" ? -1 : 1));
+				ShowMonth(currentData, direction);
+				break;
+			case "months":
+				currentData.setFullYear(currentData.getFullYear() + (direction == "left" ? -1 : 1));
+				controls_date.innerText = currentData.getFullYear();
+				break;
+			case "years":
+				var borders = controls_date.innerText.split(" - "),
+					multiplier = (direction == "left" ? -1 : 1);
+				ShowYears(Number(borders[0]) + 16*multiplier, Number(borders[1]) + 16*multiplier, direction);
+				break;
+		}
+	}
+
+	function MoveUp () {
+		switch(state){
+			case "days":
+				ShowMonths();
+				break;
+			case "months":
+				ShowYears(currentData.getFullYear() - 7, currentData.getFullYear() + 8, "show");
+				break;
+		}
+	}
+
 	controls.addEventListener("click", function (e) {
 		var el = e.target;
-		if(el.className.search("left") != -1 || el.className.search("right") != -1){
-			switch(state){
-				case "days":
-					currentData.setMonth(currentData.getMonth() + (el.className.search("left") != -1 ? -1 : 1));
-					ShowMonth(currentData, (el.className.search("left") != -1 ? "left" : "right"));
-					break;
-				case "months":
-					currentData.setFullYear(currentData.getFullYear() + (el.className.search("left") != -1 ? -1 : 1));
-					controls_date.innerText = currentData.getFullYear();
-					break;
-				case "years":
-					var borders = controls_date.innerText.split(" - "),
-						multiplier = el.className.search("left") != -1 ? -1 : 1;
-					ShowYears(Number(borders[0]) + 16*multiplier, Number(borders[1]) + 16*multiplier, (el.className.search("left") != -1 ? "left" : "right"));
-					break;
-			}
-		}
-		if(el.className.search("date") != -1){
-			switch(state){
-				case "days":
-					ShowMonths();
-					break;
-				case "months":
-					ShowYears(currentData.getFullYear() - 7, currentData.getFullYear() + 8, "show");
-					break;
-			}
-			
-		}
+		if(el.className.search("left") != -1 || el.className.search("right") != -1)
+			Move(el.className.search("left") != -1 ? "left" : "right");
+		if(el.className.search("date") != -1)
+			MoveUp();
 	}, false);
 
 	goToday.addEventListener("click", function(){
@@ -393,8 +404,7 @@ function Calendar () {
 			SelectDayByDate(selectDate);
 	}, false);
 
-	calendar.addEventListener("click", function (e) {
-		var el = e.target;
+	function SelectElement (el) {
 		if(el.tagName.toLowerCase() == "td" && el.className.search("day") != -1){
 			if(el.className.search("other_month") != -1){
 				currentData.setMonth(currentData.getMonth() + (el.className.search("previous") != -1 ? -1 : 1));
@@ -412,23 +422,70 @@ function Calendar () {
 			currentData.setFullYear(el.getAttribute("data-number_year_month"));
 			ShowMonths();
 		}
+	}
+
+	calendar.addEventListener("click", function (e) {
+		SelectElement(e.target);
 	}, false);
 	
+	function HideCalendar () {
+		calendar.style.display = "none";
+		if(table != null)
+			show_calendar.removeChild(table);
+		table = null;
+		state = "days";
+		var select_calendar = document.querySelector(".select_calendar");
+		if(select_calendar != null)
+			select_calendar.className = select_calendar.className.replace(/\s?select_calendar/, "");
+	}
+
 	document.body.addEventListener("click", function (e) {
 		var el = e.target;
 		while(el != document.body && el != calendar && el.className.search("select_calendar") == -1)
 			el = el.parentNode;
-		if(el == document.body){
-			calendar.style.display = "none";
-			if(table != null)
-				show_calendar.removeChild(table);
-			table = null;
-			state = "days";
-			var select_calendar = document.querySelector(".select_calendar");
-			if(select_calendar != null)
-				select_calendar.className = select_calendar.className.replace(/\s?select_calendar/, "");
-		}
+		if(el == document.body)
+			HideCalendar();
 	}, true);
+
+	document.body.addEventListener("keyup", function (e) {
+		var el = e.target;
+		if(e.keyCode == 27 && calendar.style.display != "none")
+			HideCalendar();
+		if(calendar.style.display != "none" && el.tagName.toLowerCase() != "input"){
+			if(e.altKey){
+				switch(e.keyCode){
+					case 39://right
+						Move("right");
+						break;
+					case 37://left
+						Move("left");
+						break;
+					case 38://up
+						MoveUp();
+						break;
+					case 40://down
+
+						break;
+				}
+			}else{
+				var selectEl = table.querySelector("td.select");
+				switch(e.keyCode){
+					case 39://right
+						SelectElement(selectEl.nextElementSibling);
+						break;
+					case 37://left
+						SelectElement(selectEl.previousElementSibling);
+						break;
+					case 38://up
+						MoveUp();
+						break;
+					case 40://down
+
+						break;
+				}
+			}
+		}
+	})
 }
 
 Calendar();
