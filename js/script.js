@@ -114,6 +114,16 @@ function GetPositionElement(el) {
 	    }, false);
 	};
 
+	for (var i = document.forms.length - 1; i >= 0; i--) {
+		document.forms[i].addEventListener("submit", function (e) {
+			var form = e.target,
+				calendars = form.querySelectorAll("input.calendar");
+			for (var i = 0; i < calendars.length; i++) {
+				calendars[i].value = (new Date((calendars[i].value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + calendars[i].value)).toDateString();
+			};
+		}, false);
+	};
+
 	function ShowCalendar (el) {
 		inputDate = el;
 		var position = GetPositionElement(inputDate);
