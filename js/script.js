@@ -3,7 +3,7 @@ function GetPositionElement(el) {
 	return {top: position.top, left: position.left}
 }
 
-function Calendar () {
+//function Calendar () {
 	var months = new Array(
 			{
 				'name':'January',
@@ -158,6 +158,7 @@ function Calendar () {
 			tableCell.innerText = name_days[i];
 			tableRow.appendChild(tableCell);
 		};
+		tableRow.className += " name_days";
 		month.appendChild(tableRow);
 		for (var i = 0; i < 6; i++) {
 			tableRow = document.createElement("tr");
@@ -166,7 +167,7 @@ function Calendar () {
 				tableCell.innerText = date.getDate();
 				tableCell.className = "day";
 				if(date.getMonth() != currentData.getMonth()) 
-					tableCell.className += " other_month " + (date.getMonth() < currentData.getMonth() ? "previous" : "next");
+					tableCell.className += " other_month " + (date.getTime() < currentData.getTime() ? "previous" : "next");
 				if(date.toLocaleDateString() == today.toLocaleDateString()) 
 					tableCell.className += " today";
 				if(date.toLocaleDateString() == selectDate.toLocaleDateString())
@@ -254,7 +255,7 @@ function Calendar () {
 				el.setAttribute("data-id_month", numberMonth);
 				tableCell.appendChild(el);
 				tableCell.className = "month";
-				if(numberMonth == currentData.getMonth())
+				if(numberMonth == selectDate.getMonth())
 					tableCell.className += " select";
 				tableRow.appendChild(tableCell);
 			};
@@ -308,7 +309,7 @@ function Calendar () {
 				el.setAttribute("data-number_year_month", i);
 				tableCell.appendChild(el);
 				tableCell.className = "year";
-				if(i == currentData.getFullYear())
+				if(i == selectDate.getFullYear())
 					tableCell.className += " select";
 				tableRow.appendChild(tableCell);
 			};
@@ -447,11 +448,72 @@ function Calendar () {
 			HideCalendar();
 	}, true);
 
+	function ChangeSelectDate (direction) {
+		switch(direction){
+			case "Up":
+				switch(state){
+					case "days":
+						selectDate.setDate(selectDate.getDate() - 7);
+						break;
+					case "months":
+						if(selectDate.getMonth() >= 3)
+							selectDate.setMonth(selectDate.getMonth() - 3);
+						break;
+					case "years":
+						selectDate.setFullYear(selectDate.getFullYear() - 4);
+						break;
+				}
+				break;
+			case "Down":
+				switch(state){
+					case "days":
+						selectDate.setDate(selectDate.getDate() + 7);
+						break;
+					case "months":
+						if(selectDate.getMonth() <= 8)
+							selectDate.setMonth(selectDate.getMonth() + 3);
+						break;
+					case "years":
+						selectDate.setFullYear(selectDate.getFullYear() + 4);
+						break;
+				}
+				break;
+			case "Left":
+				switch(state){
+					case "days":
+						selectDate.setDate(selectDate.getDate() - 1);
+						break;
+					case "months":
+						if(selectDate.getMonth() >= 1)
+							selectDate.setMonth(selectDate.getMonth() - 1);
+						break;
+					case "years":
+						selectDate.setFullYear(selectDate.getFullYear() - 1);
+						break;
+				}
+				break;
+			case "Right":
+				switch(state){
+					case "days":
+						selectDate.setDate(selectDate.getDate() + 1);
+						break;
+					case "months":
+						if(selectDate.getMonth() <= 10)
+							selectDate.setMonth(selectDate.getMonth() + 1);
+						break;
+					case "years":
+						selectDate.setFullYear(selectDate.getFullYear() + 1);
+						break;
+				}
+				break;
+		}
+	}
+
 	document.body.addEventListener("keyup", function (e) {
 		var el = e.target;
 		if(e.keyCode == 27 && calendar.style.display != "none")
 			HideCalendar();
-		if(calendar.style.display != "none" && el.tagName.toLowerCase() != "input"){
+		if(calendar.style.display != "none" && el.tagName.toLowerCase() != "input" && ((e.keyCode <= 40 && e.keyCode >= 37) || e.keyCode == 13)){
 			if(e.altKey){
 				switch(e.keyCode){
 					case 39://right
@@ -464,28 +526,85 @@ function Calendar () {
 						MoveUp();
 						break;
 					case 40://down
-
+					case 13://enter
+						if(state == "months" || state == "years")
+							SelectElement(table.querySelector("td.select span"));
 						break;
 				}
 			}else{
-				var selectEl = table.querySelector("td.select");
-				switch(e.keyCode){
-					case 39://right
-						SelectElement(selectEl.nextElementSibling);
-						break;
-					case 37://left
-						SelectElement(selectEl.previousElementSibling);
-						break;
-					case 38://up
-						MoveUp();
-						break;
-					case 40://down
-
-						break;
+				if(e.keyCode == 13){
+					if(state == "months" || state == "years")
+						SelectElement(table.querySelector("td.select span"));
+				}else{
+					ChangeSelectDate(e.keyIdentifier);
+					var selectEl = table.querySelector("td.select"),
+						newSelectEl,
+						parentEl = selectEl.parentNode;
+					switch(e.keyCode){
+						case 39://right
+							if(parentEl.lastChild == selectEl){
+								if(parentEl.nextElementSibling != null)
+									newSelectEl = parentEl.nextElementSibling.firstChild;
+								else
+									if(state == "years")
+										Move("right");
+							}
+							else 
+								newSelectEl = selectEl.nextElementSibling;
+							break;
+						case 37://left
+							if(parentEl.firstChild == selectEl){
+								if(parentEl.previousElementSibling != null)
+									newSelectEl = parentEl.previousElementSibling.lastChild;
+								else
+									if(state == "years")
+										Move("left");
+							}
+							else 
+								newSelectEl = selectEl.previousElementSibling;
+							break;
+						case 38://up
+							var previousEl = parentEl.previousElementSibling,
+								position = 0;
+							if(previousEl != null && previousEl.className.search("name_days") == -1){
+								for (var children = parentEl.childNodes; position < children.length; position++) {
+									if(children[position] == selectEl)
+										break;
+								}
+								newSelectEl = previousEl.childNodes[position];
+							}/*else
+								if(state == "days")
+									selectDate.setDate(selectDate.getDate() - 7);*/
+							break;
+						case 40://down
+							var nextEl = parentEl.nextElementSibling,
+								position = 0;
+							if(nextEl != null){
+								for (var children = parentEl.childNodes; position < children.length; position++) {
+									if(children[position] == selectEl)
+										break;
+								}
+								newSelectEl = nextEl.childNodes[position];
+							}/*else
+								if(state == "days")
+									selectDate.setDate(selectDate.getDate() + 7);*/
+							break;
+					}
+					if(newSelectEl == null && state == "days"){
+						ShowMonth(selectDate, (currentData.getTime() < selectDate.getTime() ? "right" : "left"));
+						SelectDayByDate(selectDate);
+					}
+					else
+						if(newSelectEl != null){
+							newSelectEl.className += " select";
+							selectEl.className = selectEl.className.replace("select","");
+							if(state == "days")
+								SelectElement(newSelectEl);
+						}
 				}
 			}
 		}
 	})
-}
+//}
 
-Calendar();
+//Calendar();
