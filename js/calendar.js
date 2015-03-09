@@ -617,7 +617,8 @@ function Calendar () {
 			editMonth = false;
 		}, false)
 
-		inputsDate[i].addEventListener("click", function (e) {
+		inputsDate[i].addEventListener("mousedown", function (e) {
+			e.target.focus();
 			SelectCurrentPosition(e.target);
 			e.preventDefault();
 		})
