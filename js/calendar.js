@@ -45,7 +45,6 @@
 		controls_date = document.createElement("div"),
 		goToday = document.createElement("button"),
 		today = new Date(),
-		currentData = new Date(),
 		selectDate = new Date(),
 		inputDate = null,
 		state = "days",
@@ -120,9 +119,8 @@
 		calendar.style.left = position.left + "px";
 		calendar.style.display = "block";
 		selectDate = StringToDate(inputDate.value);
-		currentData = StringToDate(inputDate.value);
 		number_showed = 0;
-		ShowMonth(currentData);
+		ShowMonth(selectDate);
 	}
 
 	function HideCalendar () {
@@ -161,8 +159,8 @@
 				tableCell = document.createElement("td");
 				tableCell.innerText = date.getDate();
 				tableCell.className = "day";
-				if(date.getMonth() != currentData.getMonth()) 
-					tableCell.className += " other_month " + (date.getTime() < currentData.getTime() ? "previous" : "next");
+				if(date.getMonth() != selectDate.getMonth()) 
+					tableCell.className += " other_month " + (date.getTime() < selectDate.getTime() ? "previous" : "next");
 				if(date.toLocaleDateString() == today.toLocaleDateString()) 
 					tableCell.className += " today";
 				if(date.toLocaleDateString() == selectDate.toLocaleDateString())
@@ -177,7 +175,7 @@
 	}
 
 	function ShowMonth (date, direction) {
-		currentData = new Date(date);
+		selectDate = new Date(date);
 		controls_date.innerText = months[date.getMonth()].name + " " + date.getFullYear();
 		var newtable = CreateMonth(date);
 		if(state != "days"){
@@ -214,24 +212,6 @@
 		state = "days";
 	}
 
-	function SelectDayByElement (el) {
-		var previousSelect = calendar.querySelector("td.select");
-		if(previousSelect)
-			previousSelect.className = previousSelect.className.replace(/\s?select/, "");
-		el.className += " select";
-		selectDate = new Date((currentData.getMonth() + 1) + "." + el.innerText + "." + currentData.getFullYear());
-		inputDate.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
-	}
-
-	function SelectDayByDate (date) {
-		var days = table.querySelectorAll("td:not(.other_month)");
-		for (var i = 0; i < days.length; i++)
-			if(days[i].innerText == date.getDate()){
-				SelectDayByElement(days[i]);
-				break;
-			}
-	}
-
 	function CreateMonths () {
 		var months = [
 			["Jan", "Feb", "Mar"],
@@ -245,9 +225,9 @@
 			tableRow = document.createElement("tr");
 			for (var j = 0; j < months[i].length; j++, numberMonth++) {
 				tableCell = document.createElement("td");
+				tableCell.setAttribute("data-id_month", numberMonth);
 				el = document.createElement("span");
 				el.innerText = months[i][j];
-				el.setAttribute("data-id_month", numberMonth);
 				tableCell.appendChild(el);
 				tableCell.className = "month";
 				if(numberMonth == selectDate.getMonth())
@@ -261,7 +241,7 @@
 	}
 
 	function ShowMonths (direction) {
-		controls_date.innerText = currentData.getFullYear();
+		controls_date.innerText = selectDate.getFullYear();
 		var newtable = CreateMonths();
 		if(state == "days"){
 			Transform(table, 0, 0.5);
@@ -299,9 +279,9 @@
 			tableRow = document.createElement("tr");
 			for ( ; i < end ; i++) {
 				tableCell = document.createElement("td");
+				tableCell.setAttribute("data-number_year_month", i);
 				el = document.createElement("span");
 				el.innerText = i;
-				el.setAttribute("data-number_year_month", i);
 				tableCell.appendChild(el);
 				tableCell.className = "year";
 				if(i == selectDate.getFullYear())
@@ -350,15 +330,47 @@
 		}
 	}
 
+	function ChangeSelectDateByElement (el) {
+		switch(state){
+			case "days":
+				selectDate.setDate(el.innerHTML);
+				break;
+			case "months":
+				selectDate.setMonth(el.getAttribute("data-id_month"));
+				break;
+			case "years":
+				selectDate.setDate(el.getAttribute("data-number_year_month"));
+				break;
+		}
+	}
+
+	function SelectDayByElement (el) {
+		var previousSelect = calendar.querySelector("td.select");
+		if(previousSelect != null)
+			previousSelect.className = previousSelect.className.replace(/\s?select/, "");
+		el.className += " select";
+		ChangeSelectDateByElement(el);
+		inputDate.value = DateToString(selectDate, "words");
+	}
+
+	function SelectDayByDate (date) {
+		var days = table.querySelectorAll("td:not(.other_month)");
+		for (var i = 0; i < days.length; i++)
+			if(days[i].innerText == date.getDate()){
+				SelectDayByElement(days[i]);
+				break;
+			}
+	}
+
 	function Move (direction) {
 		switch(state){
 			case "days":
-				currentData.setMonth(currentData.getMonth() + (direction == "left" ? -1 : 1));
-				ShowMonth(currentData, direction);
+				selectDate.setMonth(selectDate.getMonth() + (direction == "left" ? -1 : 1));
+				ShowMonth(selectDate, direction);
 				break;
 			case "months":
-				currentData.setFullYear(currentData.getFullYear() + (direction == "left" ? -1 : 1));
-				controls_date.innerText = currentData.getFullYear();
+				selectDate.setFullYear(selectDate.getFullYear() + (direction == "left" ? -1 : 1));
+				controls_date.innerText = selectDate.getFullYear();
 				break;
 			case "years":
 				var borders = controls_date.innerText.split(" - "),
@@ -374,7 +386,7 @@
 				ShowMonths();
 				break;
 			case "months":
-				ShowYears(currentData.getFullYear() - 7, currentData.getFullYear() + 8, "show");
+				ShowYears(selectDate.getFullYear() - 7, selectDate.getFullYear() + 8, "show");
 				break;
 		}
 	}
@@ -382,19 +394,19 @@
 	function SelectElement (el) {
 		if(el.tagName.toLowerCase() == "td" && el.className.search("day") != -1){
 			if(el.className.search("other_month") != -1){
-				currentData.setMonth(currentData.getMonth() + (el.className.search("previous") != -1 ? -1 : 1));
-				selectDate = new Date(currentData.getFullYear() + " " + (currentData.getMonth() + 1) + " " + el.innerText);
-				ShowMonth(currentData, (el.className.search("next") != -1 ? "right" : "left"));
+				selectDate.setMonth(selectDate.getMonth() + (el.className.search("previous") != -1 ? -1 : 1));
+				selectDate = new Date(selectDate.getFullYear() + " " + (selectDate.getMonth() + 1) + " " + el.innerText);
+				ShowMonth(selectDate, (el.className.search("next") != -1 ? "right" : "left"));
 				SelectDayByDate(selectDate);
 			}
 			else SelectDayByElement(el);
 		}
 		if(el.tagName.toLowerCase() == "span" && el.getAttribute("data-id_month") != null){
-			currentData.setMonth(el.getAttribute("data-id_month"));
-			ShowMonth(currentData);
+			selectDate.setMonth(el.getAttribute("data-id_month"));
+			ShowMonth(selectDate);
 		}
 		if(el.tagName.toLowerCase() == "span" && el.getAttribute("data-number_year_month") != null){
-			currentData.setFullYear(el.getAttribute("data-number_year_month"));
+			selectDate.setFullYear(el.getAttribute("data-number_year_month"));
 			ShowMonths();
 		}
 	}
@@ -487,8 +499,8 @@
 		inputsDate[i].addEventListener("change", function () {
 	        selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
 	        if(calendar.style.display != "none"){
-	        	if(selectDate.getMonth() != currentData.getMonth() || selectDate.getFullYear() != currentData.getFullYear()) 
-		            ShowMonth(selectDate, (currentData.getFullYear() < selectDate.getFullYear() || currentData.getMonth() < selectDate.getMonth() ? "right" : "left"));
+	        	if(selectDate.getMonth() != selectDate.getMonth() || selectDate.getFullYear() != selectDate.getFullYear()) 
+		            ShowMonth(selectDate, (selectDate.getFullYear() < selectDate.getFullYear() || selectDate.getMonth() < selectDate.getMonth() ? "right" : "left"));
 		        SelectDayByDate(selectDate);
 	        }
 	    }, false);
@@ -527,9 +539,9 @@
 	}, false);
 
 	goToday.addEventListener("click", function(){
-		var flag = currentData.getMonth() != today.getMonth() || currentData.getFullYear() != today.getFullYear();
+		var flag = selectDate.getMonth() != today.getMonth() || selectDate.getFullYear() != today.getFullYear();
 		if(flag || state != "days")
-			ShowMonth(new Date(), (currentData.getFullYear() < today.getFullYear() || currentData.getMonth() < today.getMonth() ? "right" : "left"));
+			ShowMonth(new Date(), (selectDate.getFullYear() < today.getFullYear() || selectDate.getMonth() < today.getMonth() ? "right" : "left"));
 		selectDate = new Date();
 		if(flag || state != "days")
 			setTimeout(function(){
@@ -625,7 +637,7 @@
 							break;
 					}
 					if(newSelectEl == null && state == "days"){
-						ShowMonth(selectDate, (currentData.getTime() < selectDate.getTime() ? "right" : "left"));
+						ShowMonth(selectDate, (selectDate.getTime() < selectDate.getTime() ? "right" : "left"));
 						SelectDayByDate(selectDate);
 					}
 					else
