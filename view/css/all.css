@@ -1,0 +1,105 @@
+*{
+	padding: 0;
+	margin: 0;
+	outline: none;
+	text-decoration: none;
+}
+
+@font-face {
+	font-family: Lato;
+	src: url(fonts/Lato-Light.ttf);
+}
+
+body{
+	background: #e6e6e8;
+	font-family: Lato;
+	padding-top: 0.1px; 
+}
+
+table{
+	border-collapse: collapse;
+}
+
+.b-menu a, .b-menu a:visited{
+	font-family: Lato;
+	color: #fff;
+}
+
+a.link{
+	text-decoration: underline;
+	color: #fff;
+}
+
+li{
+	list-style-position: inside;
+}
+
+.left{
+	float: left;
+}
+
+.right{
+	float: right;
+}
+
+.b-menu{
+	background: #323439;
+	box-shadow: 0 0 5px 0 #333;
+	position: fixed;
+	width: 100%;
+	padding: 8px 0;
+	font-size: 16px;
+	z-index: 9999;
+	-webkit-transform: translateZ(0);
+}
+
+.b-menu .right{
+	margin-right: 20px;
+}
+
+.b-menu .elMenu{
+	margin: 22px 10px;
+	display: inline-block;
+	position: relative;
+}
+
+.b-menu .elMenu.logo{
+	margin: 0;
+	margin-left: 20px;
+	padding: 17px 0 17px 80px;
+	font-size: 25px;
+	background: url("../images/calendar-white.png") no-repeat;
+}
+
+.b-menu .big_menu .elMenu:after{
+	content: "";
+	position: absolute;
+	width: 100%;
+	height: 0;
+	background: #fff;
+	z-index: 1000;
+	bottom: 1px;
+	left: 0;
+	transition: height, bottom 0.2s ease-out;
+}
+
+.b-menu .big_menu .elMenu:hover:after{
+	height: 2px;
+	bottom: -2px;
+}
+
+.b-menu .elMenu.logo:after,
+.b-menu .elMenu.logo:hover:after{
+	height: 0;
+}
+
+.b-content{
+	width: 80%;
+	margin: 100px auto 0;
+}
+
+.b-content > div{
+	background: #f7f7f7;
+	margin: 0 0 20px;
+	padding: 30px;
+}

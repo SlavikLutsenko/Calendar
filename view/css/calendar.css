@@ -1,0 +1,309 @@
+@font-face {
+	font-family: Lato;
+	src: url(fonts/Lato-Light.ttf);
+}
+
+@font-face {
+	font-family: Lato-Regular;
+	src: url(fonts/Lato-Regular.ttf);
+}
+
+*{
+	padding: 0;
+	margin: 0;
+	outline: none;
+}
+
+input.calendar,
+input.help_input{
+	box-sizing: border-box;
+	width: 330px;
+	margin-bottom: 5px;
+	padding: 14px 17px;
+	background: transparent;
+	color: #323439;
+	font-size: 18px;
+	font-family: Lato;
+	border: none;
+	position: relative;
+	z-index: 100;
+}
+
+input.help_input{
+	position: absolute;
+	background: #fff;
+	top: -16px;
+	left: 0;
+	color: #bbb;
+	z-index: 10;
+}
+
+.wrapper_input_calendar{
+	position: relative;
+	display: inline;
+}
+
+.wrapper_input_calendar label.button_show_calendar{
+	position: absolute;
+	background: #d5d5d6;
+	cursor: pointer;
+	width: 27px;
+	height: 24px;
+	top: 50%;
+	right: 50%;
+	margin-top: -14px;
+	margin-right: -150px;
+	transition: background .5s ease;
+	z-index: 10000;
+}
+
+.wrapper_input_calendar label.button_show_calendar:hover{
+	background: #5a5b5f;
+}
+
+.wrapper_input_calendar label.button_show_calendar:after{
+	content: "";
+	position: absolute;
+	height: 17px;
+	width: 23px;
+	top: 5px;
+	left: 2px;
+	background: #fff;
+}
+
+.b-calendar{
+	-webkit-user-select: none;
+	overflow: hidden;
+	display: none;
+	width: 330px;
+	font-family: Lato;
+	background: #323439;
+	padding: 0.1px 0;
+	position: absolute;
+}
+
+.b-calendar .b-controls{
+	background: #5a5b5f;
+	color: #fff;
+	font-size: 18px;
+	overflow: hidden;
+}
+
+.b-calendar .b-controls .button:not(.date){
+	height: 50px;
+	width: 50px;
+	position: relative;
+}
+
+.b-calendar .b-controls .button{
+	float: left;
+	cursor: pointer;
+}
+
+.b-calendar .b-controls .button.date{
+	padding: 14px 0;
+	text-align: center;
+	width: 230px;
+}
+
+.b-calendar .b-controls .button:hover{
+	background: #333;
+	transition: background .5s ease;	
+}
+
+.b-calendar .b-controls .button.left:after,
+.b-calendar .b-controls .button.left:before,
+.b-calendar .b-controls .button.right:after,
+.b-calendar .b-controls .button.right:before{
+	content: "";
+	width: 0;
+	height: 0;
+	position: absolute;
+	top: 9px;
+	border: 16px solid transparent;
+}
+
+.b-calendar .b-controls .button.left:after,
+.b-calendar .b-controls .button.left:before{
+	border-left: 0;
+}
+
+.b-calendar .b-controls .button.left:after{
+	left: 14px;
+	border-right-color: #a0a0a2;  
+	z-index: 10;
+}
+
+.b-calendar .b-controls .button.left:before{
+	left: 16px;
+	border-right-color: #5a5b5f;  
+	z-index: 100;
+}
+
+.b-calendar .b-controls .button:hover.left:before{
+	border-right-color: #333;
+	transition: border-right-color .5s ease;
+}
+
+.b-calendar .b-controls .button.right:after,
+.b-calendar .b-controls .button.right:before{
+	border-right: 0;
+}
+
+.b-calendar .b-controls .button.right:after{
+	right: 14px;
+	border-left-color: #a0a0a2;  
+	z-index: 10;
+}
+
+.b-calendar .b-controls .button.right:before{
+	right: 16px;
+	border-left-color: #5a5b5f;  
+	z-index: 100;
+}
+
+.b-calendar .b-controls .button:hover.right:before{
+	border-left-color: #333;
+	transition: border-left-color .5s ease;
+}
+
+.b-calendar .show_calendar{
+	height: 300px;
+	overflow: hidden;
+}
+
+.b-calendar .calendar{
+	width: 270px;
+	position: absolute;
+	top: 50px;
+	left: 30px;
+	min-height: 270px;
+	margin: 20px auto;
+	color: #fff;
+	border-color: #fff;
+	border-collapse: collapse;
+	opacity: 1;
+	transform: scale(1);
+	-webkit-transform: scale(1);
+	transition: left 0.3s ease, 
+				right 0.3s ease,
+				transform 0.3s ease,
+				opacity 0.3s ease;
+}
+
+.b-calendar .calendar th{
+	font-family: Lato-Regular;
+	font-weight: normal;
+	font-size: 12px;
+}
+
+.b-calendar .calendar tr{
+	font-family: Lato;
+	font-size: 16px;
+}
+
+.b-calendar .calendar td,
+.b-calendar .calendar th{
+	padding: 4px;
+	width: 30px;
+	height: 30px;
+	text-align: center;
+}
+
+.b-calendar .calendar td,
+.b-calendar .calendar td.month span,
+.b-calendar .calendar td.year span{
+	cursor: pointer;
+	transition: box-shadow 0.3s ease, 
+				border-radius 0.3s ease,
+				background 0.3s ease;
+}
+
+.b-calendar .calendar td.month,
+.b-calendar .calendar td.year{
+	cursor: default;
+}
+
+.b-calendar .calendar td.month span,
+.b-calendar .calendar td.year span{
+	display: inline-block;
+	padding: 4px 10px;
+}
+
+.b-calendar .calendar td:not(.select):not(.month):not(.year):hover,
+.b-calendar .calendar td.month span:hover,
+.b-calendar .calendar td.year span:hover{
+	background: #323439;
+	box-shadow: inset 0 0 0 20px #222;
+	border-radius: 50%;
+}
+
+.b-calendar .calendar td.month span:hover,
+.b-calendar .calendar td.year span:hover{
+	border-radius: 20px;
+	background: #323439 !important;
+}
+
+.b-calendar .calendar td:not(.month):not(.year):active,
+.b-calendar .calendar td.month span:active,
+.b-calendar .calendar td.year span:active{
+	box-shadow: inset 0 0 0 0 #222 !important;
+	background: #e8736f !important;
+	border-radius: 50%;
+}
+
+.b-calendar .calendar .other_month{
+	color: #838487;
+}
+
+.b-calendar .calendar .select:not(.month):not(.year),
+.b-calendar .calendar td.month.select span,
+.b-calendar .calendar td.year.select span
+{
+	background: #e8736f;
+	font-family: Lato-Regular;
+	border-radius: 50%;
+	color: #fff !important;
+}
+
+.b-calendar .calendar td.month span:hover,
+.b-calendar .calendar td.month.select span,
+.b-calendar .calendar td.year span:hover,
+.b-calendar .calendar td.year.select span{
+	border-radius: 20px;
+}
+
+.b-calendar .calendar .today{
+	border-radius: 50%;
+	box-shadow: inset 0 0 0 1px #e8736f;
+}
+
+
+
+
+
+
+
+
+
+
+
+.b-calendar .goToday{
+	width: 135px;
+	display: block;
+	font-size: 16px;
+	font-family: inherit;
+	color: #fff;
+	background: #282a2d;
+	border: none;
+	border-radius: 70px;
+	padding: 5px 0 7px;
+	margin: 0px auto 20px;
+	cursor: pointer;
+}
+
+.b-calendar .goToday:hover{
+	background: #ddd;
+	color: #333;
+	transition: background .5s ease, color .5s ease;
+}
