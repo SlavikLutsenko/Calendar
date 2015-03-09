@@ -436,6 +436,28 @@
 		}
 	}
 
+	function IncCurrentPosition (el) {
+		if(currentPosition < el.value.length - 1)
+			currentPosition++;
+		SelectCurrentPosition(el);
+		if(GetSelected(el) == " "){
+			if(currentPosition < el.value.length)
+				currentPosition++;
+			SelectCurrentPosition(el);
+		}
+	}
+
+	function DicCurrentPosition (el) {
+		if(currentPosition > 0)
+			currentPosition--;
+		SelectCurrentPosition(el);
+		if(GetSelected(el) == " "){
+			if(currentPosition > 0)
+				currentPosition--;
+			SelectCurrentPosition(el);
+		}
+	}
+
 	function SelectCurrentPosition (el) {
 		el.setSelectionRange(currentPosition, currentPosition + 1);
 	}
@@ -446,6 +468,26 @@
 
 	function ShowDate (style) {
 		inputDate.value = DateToString(selectDate, style);
+	}
+
+	function EnterYear (key) {
+		if(key.keyCode >= 48 && key.keyCode <= 57){
+			inputDate.value = inputDate.value.substr(0, currentPosition) + String.fromCharCode(key.keyCode) + inputDate.value.substring(currentPosition + 1, inputDate.value.length);
+			IncCurrentPosition(inputDate);
+			selectDate = StringToDate(inputDate.value);
+		}
+	}
+
+	function EnterDay (key) {
+		if(key.keyCode >= 48 && key.keyCode <= 57){
+			inputDate.value = inputDate.value.substr(0, currentPosition) + String.fromCharCode(key.keyCode) + inputDate.value.substring(currentPosition + 1, inputDate.value.length);
+			var number = Number(inputDate.value.substring(inputDate.value.length - 2, inputDate.value.length));
+			if(number > months[selectDate.getMonth()].day)
+				number = months[selectDate.getMonth()].day;
+			inputDate.value = inputDate.value.substring(0, inputDate.value.length - 2) + number;
+			IncCurrentPosition(inputDate);
+			selectDate = StringToDate(inputDate.value);
+		}
 	}
 
 	CreateCalendar();
@@ -492,32 +534,18 @@
 			var el = e.target;
 			e.preventDefault();
 			if(currentPosition >= 0 && currentPosition <= 3){
-				//EnterYear(e);
+				EnterYear(e);
 			}else if(currentPosition >= 5 && currentPosition < 5 + months[today.getMonth()].name.length){
 				//EnterMonth(e);
 			}else{
-				//input day
+				EnterDay(e);
 			}
 			switch(e.keyCode){
 				case 37: //left
-					if(currentPosition > 0)
-						currentPosition--;
-					SelectCurrentPosition(el);
-					if(GetSelected(el) == " "){
-						if(currentPosition > 0)
-							currentPosition--;
-						SelectCurrentPosition(el);
-					}
+					DicCurrentPosition(inputDate);
 					break;
 				case 39: //right
-					if(currentPosition < el.value.length - 1)
-						currentPosition++;
-					SelectCurrentPosition(el);
-					if(GetSelected(el) == " "){
-						if(currentPosition < el.value.length)
-							currentPosition++;
-						SelectCurrentPosition(el);
-					}
+					IncCurrentPosition(inputDate);
 					break;
 					case 38://up
 						if(currentPosition >= 0 && currentPosition <= 3){
