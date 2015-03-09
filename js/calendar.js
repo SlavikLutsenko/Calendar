@@ -1,4 +1,4 @@
-//function Calendar () {
+function Calendar () {
 	var months = new Array(
 			{
 				'name':'January',
@@ -39,6 +39,7 @@
 			}
 		),
 		inputsDate = document.querySelectorAll("input.calendar"),
+		help_input = null,
 		calendar = document.createElement("div"),
 		show_calendar = document.createElement("div"),
 		controls = document.createElement("div"),
@@ -49,7 +50,12 @@
 		inputDate = null,
 		state = "days",
 		number_showed = 0,
-		table = null;
+		table = null,
+		currentPosition = 0,
+		nameMonth = "",
+		numberMonth = -1,
+		position = 1,
+		editMonth = false;
 
 	function GetPositionElement(el) {
 		var position = el.getBoundingClientRect();
@@ -63,6 +69,9 @@
 				break;
 			case "number":
 				return (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + "." + (date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1) + "." + date.getFullYear();
+				break;
+			case "full_words":
+				return date.getFullYear() + " " + months[date.getMonth()].name + " " + (date.getDate() < 10 ? "0" + date.getDate() : date.getDate());
 				break;
 			default:
 				console.error("error format data");
@@ -105,6 +114,9 @@
 		var button_show_calendar = document.createElement("label");
 		button_show_calendar.className = "button_show_calendar";
 		wrapper_input_calendar.appendChild(button_show_calendar);
+		help_input = document.createElement("input");
+		help_input.className = "help_input";
+		wrapper_input_calendar.appendChild(help_input);
 		el.parentNode.replaceChild(wrapper_input_calendar, el);
 		el = wrapper_input_calendar.querySelector("input.calendar");
 		el.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
@@ -294,7 +306,11 @@
 		return years;
 	}
 
-	function ShowYears (startYear, finishYear, direction) {
+	function ShowYears (direction) {
+		var startYear, finishYear;
+		for(startYear = selectDate.getFullYear(); startYear % 16 != 0; startYear--);
+		for(finishYear = selectDate.getFullYear() + 1; finishYear % 16 != 0; finishYear++);
+		finishYear--;
 		controls_date.innerText = startYear + " - " + finishYear;
 		var newtable = CreateYears(startYear, finishYear);
 		if(direction == "show"){
@@ -339,9 +355,10 @@
 				selectDate.setMonth(el.getAttribute("data-id_month"));
 				break;
 			case "years":
-				selectDate.setDate(el.getAttribute("data-number_year_month"));
+				selectDate.setFullYear(el.getAttribute("data-number_year_month"));
 				break;
 		}
+		inputDate.value = DateToString(selectDate, "words");
 	}
 
 	function SelectDayByElement (el) {
@@ -350,7 +367,6 @@
 			previousSelect.className = previousSelect.className.replace(/\s?select/, "");
 		el.className += " select";
 		ChangeSelectDateByElement(el);
-		inputDate.value = DateToString(selectDate, "words");
 	}
 
 	function SelectDayByDate (date) {
@@ -362,7 +378,8 @@
 			}
 	}
 
-	function Move (direction) {
+	function Move (direction, flag) {
+		if(flag == null) flag = true;
 		switch(state){
 			case "days":
 				selectDate.setMonth(selectDate.getMonth() + (direction == "left" ? -1 : 1));
@@ -375,9 +392,12 @@
 			case "years":
 				var borders = controls_date.innerText.split(" - "),
 					multiplier = (direction == "left" ? -1 : 1);
-				ShowYears(Number(borders[0]) + 16*multiplier, Number(borders[1]) + 16*multiplier, direction);
+				if(flag)
+					selectDate.setFullYear(selectDate.getFullYear() + (direction == "left" ? -16 : 16));
+				ShowYears(direction);
 				break;
 		}
+		inputDate.value = DateToString(selectDate, "words");
 	}
 
 	function MoveUp () {
@@ -386,7 +406,18 @@
 				ShowMonths();
 				break;
 			case "months":
-				ShowYears(selectDate.getFullYear() - 7, selectDate.getFullYear() + 8, "show");
+				ShowYears("show");
+				break;
+		}
+	}
+
+	function MoveDown () {
+		switch(state){
+			case "years":
+				ShowMonths();
+				break;
+			case "months":
+				ShowMonth(selectDate);
 				break;
 		}
 	}
@@ -401,75 +432,148 @@
 			}
 			else SelectDayByElement(el);
 		}
-		if(el.tagName.toLowerCase() == "span" && el.getAttribute("data-id_month") != null){
-			selectDate.setMonth(el.getAttribute("data-id_month"));
+		if(el.tagName.toLowerCase() == "span")
+			el = el.parentNode;
+		if(el.getAttribute("data-id_month") != null){
+			ChangeSelectDateByElement(el);
 			ShowMonth(selectDate);
 		}
-		if(el.tagName.toLowerCase() == "span" && el.getAttribute("data-number_year_month") != null){
-			selectDate.setFullYear(el.getAttribute("data-number_year_month"));
+		if(el.getAttribute("data-number_year_month") != null){
+			ChangeSelectDateByElement(el);
 			ShowMonths();
 		}
 	}
 
-	function ChangeSelectDate (direction) {
-		switch(direction){
-			case "Up":
-				switch(state){
-					case "days":
-						selectDate.setDate(selectDate.getDate() - 7);
-						break;
-					case "months":
-						if(selectDate.getMonth() >= 3)
-							selectDate.setMonth(selectDate.getMonth() - 3);
-						break;
-					case "years":
-						selectDate.setFullYear(selectDate.getFullYear() - 4);
-						break;
-				}
-				break;
-			case "Down":
-				switch(state){
-					case "days":
-						selectDate.setDate(selectDate.getDate() + 7);
-						break;
-					case "months":
-						if(selectDate.getMonth() <= 8)
-							selectDate.setMonth(selectDate.getMonth() + 3);
-						break;
-					case "years":
-						selectDate.setFullYear(selectDate.getFullYear() + 4);
-						break;
-				}
-				break;
-			case "Left":
-				switch(state){
-					case "days":
-						selectDate.setDate(selectDate.getDate() - 1);
-						break;
-					case "months":
-						if(selectDate.getMonth() >= 1)
-							selectDate.setMonth(selectDate.getMonth() - 1);
-						break;
-					case "years":
-						selectDate.setFullYear(selectDate.getFullYear() - 1);
-						break;
-				}
-				break;
-			case "Right":
-				switch(state){
-					case "days":
-						selectDate.setDate(selectDate.getDate() + 1);
-						break;
-					case "months":
-						if(selectDate.getMonth() <= 10)
-							selectDate.setMonth(selectDate.getMonth() + 1);
-						break;
-					case "years":
-						selectDate.setFullYear(selectDate.getFullYear() + 1);
-						break;
-				}
-				break;
+	function IncCurrentPosition (el) {
+		if(currentPosition < el.value.length - 1)
+			currentPosition++;
+		SelectCurrentPosition(el);
+		if(GetSelected(el) == " "){
+			if(currentPosition < el.value.length)
+				currentPosition++;
+			SelectCurrentPosition(el);
 		}
+	}
+
+	function DicCurrentPosition (el) {
+		if(currentPosition > 0)
+			currentPosition--;
+		SelectCurrentPosition(el);
+		if(GetSelected(el) == " "){
+			if(currentPosition > 0)
+				currentPosition--;
+			SelectCurrentPosition(el);
+		}
+	}
+
+	function SelectCurrentPosition (el) {
+		el.setSelectionRange(currentPosition, currentPosition);
+	}
+
+	function GetSelected (el) {
+		return el.value.substr(el.selectionStart, 1);
+	}
+
+	function ShowDate (style) {
+		inputDate.value = DateToString(selectDate, style);
+	}
+
+	function EnterYear (key) {
+		if(key.keyCode >= 48 && key.keyCode <= 57){
+			inputDate.value = inputDate.value.substr(0, currentPosition) + String.fromCharCode(key.keyCode) + inputDate.value.substring(currentPosition + 1, inputDate.value.length);
+			IncCurrentPosition(inputDate);
+			selectDate = StringToDate(inputDate.value);
+		}
+	}
+
+	function EnterDay (key) {
+		if(key.keyCode >= 48 && key.keyCode <= 57){
+			inputDate.value = inputDate.value.substr(0, currentPosition) + String.fromCharCode(key.keyCode) + inputDate.value.substring(currentPosition + 1, inputDate.value.length);
+			var number = Number(inputDate.value.substring(inputDate.value.length - 2, inputDate.value.length));
+			if(number > months[selectDate.getMonth()].day)
+				number = months[selectDate.getMonth()].day;
+			inputDate.value = inputDate.value.substring(0, inputDate.value.length - 2) + number;
+			IncCurrentPosition(inputDate);
+			selectDate = StringToDate(inputDate.value);
+		}
+	}
+
+	function EnterMonth (key) {
+		var updataDate = false;
+		if((key.keyCode >= 65 && key.keyCode <= 90) || (key.keyCode >= 97 && key.keyCode <= 122)){
+			nameMonth += String.fromCharCode(key.keyCode).toLowerCase();
+			var	flag = false;
+			for (var i = 0; i < months.length && !flag; i++) {
+				if(months[i].name.substr(0, position).toLowerCase() == nameMonth.toLowerCase()){
+					editMonth = true;
+					flag = true;
+					position++;
+					numberMonth = i;
+				}
+			};
+			if(!flag){
+				nameMonth = nameMonth.substr(0, position - 1);
+			}
+			else{
+				if(nameMonth.length == 1) 
+					nameMonth = nameMonth.toUpperCase();
+				currentPosition++;
+			}
+		}else if(help_input.value!= ""){
+			switch(key.keyCode){
+				case 8: //backspace
+					if(position > 1)
+						position--;
+					nameMonth = nameMonth.substr(0, position - 1);
+					currentPosition--;
+					break;
+				case 9: //tab
+				case 32://space
+				case 39://right
+					nameMonth = help_input.value.split(" ")[1];
+					position = 1;
+					updataDate = true;
+					break;
+				case 38: //up
+					for (var i = numberMonth - 1; i >= 0; i--) {
+						if(months[i].name.substr(0, position - 1).toLowerCase() == nameMonth.toLowerCase()){
+							numberMonth = i;
+							break;
+						}
+					};
+					break;
+				case 40: //down
+					for (var i = numberMonth + 1; i < months.length; i++) {
+						if(months[i].name.substr(0, position - 1).toLowerCase() == nameMonth.toLowerCase()){
+							numberMonth = i;
+							break;
+						}
+					};
+					break;
+			}
+		}
+		if(editMonth){
+			if(!updataDate)
+				ShowHelpNameMonth();
+			else{
+				ShowHelpNameMonth();
+				selectDate = StringToDate(inputDate.value);
+				ShowDate("full_words");
+				help_input.value = "";
+				currentPosition = inputDate.value.length - 2;
+				editMonth = false;
+			}
+		}
+	}
+
+	function ShowHelpNameMonth () {
+		help_input.value = selectDate.getFullYear() + " " + months[numberMonth].name;
+		inputDate.value = selectDate.getFullYear() + " " + nameMonth;
+		for (var i = 0; i < months[numberMonth].name.length - nameMonth.length + 7; i++) {
+			inputDate.value += " ";
+		};
+		inputDate.value += " " + (selectDate.getDate() < 10 ? "0" + selectDate.getDate() : selectDate.getDate());
+		console.log(inputDate.value);
 	}
 
 	CreateCalendar();
@@ -489,37 +593,94 @@
 
 	document.body.addEventListener("click", function (e) {
 		var el = e.target;
-		while(el != document.body && el != calendar && el.className.search("select_calendar") == -1 && el.className.search("button_show_calendar") == -1)
+		while(el != document.body && el != calendar /*&& el.className.search("select_calendar") == -1*/ && el.className.search("button_show_calendar") == -1)
 			el = el.parentNode;
 		if(el == document.body)
 			HideCalendar();
 	}, true);
 
 	for (var i = 0; i < inputsDate.length; i++) {
-		inputsDate[i].addEventListener("change", function () {
-	        selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-	        if(calendar.style.display != "none"){
-	        	if(selectDate.getMonth() != selectDate.getMonth() || selectDate.getFullYear() != selectDate.getFullYear()) 
-		            ShowMonth(selectDate, (selectDate.getFullYear() < selectDate.getFullYear() || selectDate.getMonth() < selectDate.getMonth() ? "right" : "left"));
-		        SelectDayByDate(selectDate);
-	        }
-	    }, false);
+		inputsDate[i].addEventListener("focus", function (e) {
+			inputDate = e.target;
+			selectDate = StringToDate(inputDate.value);
+			inputDate.value = DateToString(selectDate, "full_words");
+			help_input = inputDate.nextElementSibling.nextElementSibling;
+		}, false)
 
-	    inputsDate[i].addEventListener("focus", function (e) {
-	        var el = e.target;
-	    	inputDate = el;
-	    	selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-	        el.value = selectDate.toLocaleDateString();
-	    }, false);
+		inputsDate[i].addEventListener("blur", function (e) {
+			e.target.value = DateToString(selectDate, "words");
+			currentPosition = 0;
+			nameMonth = "";
+			numberMonth = -1;
+			position = 1;
+			help_input.value = "";
+			editMonth = false;
+		}, false)
 
-	    inputsDate[i].addEventListener("blur", function (e) {
-	        var el = e.target,
-	        	date = el.value.split(/\.|\s|\//);
-	    	selectDate = new Date(date[1] + "." + date[0] + "." + date[2]);
-	        el.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
-	    }, false);
+		inputsDate[i].addEventListener("click", function (e) {
+			SelectCurrentPosition(e.target);
+			e.preventDefault();
+		})
+
+		inputsDate[i].addEventListener("keydown", function (e) {
+			var el = e.target;
+			e.preventDefault();
+			if(currentPosition >= 0 && currentPosition <= 3){
+				EnterYear(e);
+				ShowDate("full_words");
+			}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+				EnterMonth(e);
+			}else{
+				EnterDay(e);
+				ShowDate("full_words");
+			}
+			if(help_input.value == ""){
+				switch(e.keyCode){
+					case 37: //left
+						DicCurrentPosition(inputDate);
+						if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length)
+							currentPosition = 5;
+						break;
+					case 39: //right
+						IncCurrentPosition(inputDate);
+						if(currentPosition > 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length)
+							currentPosition = inputDate.value.length - 2;
+						break;
+					case 38://up
+						if(currentPosition >= 0 && currentPosition <= 3){
+							selectDate.setFullYear(selectDate.getFullYear() + 1);
+						}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+							selectDate.setMonth(selectDate.getMonth() + 1);
+							currentPosition = 5;
+						}else{
+							selectDate.setDate(selectDate.getDate() + 1);
+						}
+						ShowDate("full_words");
+						break;
+					case 40://down
+						if(currentPosition >= 0 && currentPosition <= 3){
+							selectDate.setFullYear(selectDate.getFullYear() - 1);
+						}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+							selectDate.setMonth(selectDate.getMonth() - 1);
+							currentPosition = 5;
+						}else{
+							selectDate.setDate(selectDate.getDate() - 1);
+						}
+						ShowDate("full_words");
+						break;
+					case 9: //tab
+						if(currentPosition >= 0 && currentPosition <= 3){
+							currentPosition = 5
+						}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+							currentPosition = inputDate.value.length - 2;
+						}
+						break;
+				}
+			}
+			SelectCurrentPosition(inputDate);
+		}, false)
 	};
-
+	
 	for (var i = document.forms.length - 1; i >= 0; i--) {
 		document.forms[i].addEventListener("submit", function (e) {
 			var form = e.target,
@@ -540,9 +701,9 @@
 
 	goToday.addEventListener("click", function(){
 		var flag = selectDate.getMonth() != today.getMonth() || selectDate.getFullYear() != today.getFullYear();
-		if(flag || state != "days")
-			ShowMonth(new Date(), (selectDate.getFullYear() < today.getFullYear() || selectDate.getMonth() < today.getMonth() ? "right" : "left"));
 		selectDate = new Date();
+		if(flag || state != "days")
+			ShowMonth(selectDate, (selectDate.getFullYear() < today.getFullYear() || selectDate.getMonth() < today.getMonth() ? "right" : "left"));
 		if(flag || state != "days")
 			setTimeout(function(){
 				SelectDayByDate(selectDate);
@@ -557,9 +718,9 @@
 
 	document.body.addEventListener("keyup", function (e) {
 		var el = e.target;
-		if(e.keyCode == 27 && calendar.style.display != "none")
-			HideCalendar();
-		if(calendar.style.display != "none" && el.tagName.toLowerCase() != "input" && ((e.keyCode <= 40 && e.keyCode >= 37) || e.keyCode == 13)){
+		if(calendar.style.display != "none"){
+			if(e.keyCode == 27)
+				HideCalendar();
 			if(e.altKey){
 				switch(e.keyCode){
 					case 39://right
@@ -572,17 +733,15 @@
 						MoveUp();
 						break;
 					case 40://down
-					case 13://enter
-						if(state == "months" || state == "years")
-							SelectElement(table.querySelector("td.select span"));
+						SelectDayByElement(table.querySelector("td.select"));
+						MoveDown();
 						break;
 				}
 			}else{
 				if(e.keyCode == 13){
-					if(state == "months" || state == "years")
-						SelectElement(table.querySelector("td.select span"));
+					SelectDayByElement(table.querySelector("td.select"));
+					MoveDown();
 				}else{
-					ChangeSelectDate(e.keyIdentifier);
 					var selectEl = table.querySelector("td.select"),
 						newSelectEl,
 						parentEl = selectEl.parentNode;
@@ -592,8 +751,10 @@
 								if(parentEl.nextElementSibling != null)
 									newSelectEl = parentEl.nextElementSibling.firstChild;
 								else
-									if(state == "years")
-										Move("right");
+									if(state == "years"){
+										selectDate.setFullYear(selectDate.getFullYear() + 1);
+										ShowYears("right");
+									}
 							}
 							else 
 								newSelectEl = selectEl.nextElementSibling;
@@ -603,8 +764,10 @@
 								if(parentEl.previousElementSibling != null)
 									newSelectEl = parentEl.previousElementSibling.lastChild;
 								else
-									if(state == "years")
-										Move("left");
+									if(state == "years"){
+										selectDate.setFullYear(selectDate.getFullYear() - 1);
+										ShowYears("left");
+									}
 							}
 							else 
 								newSelectEl = selectEl.previousElementSibling;
@@ -618,9 +781,7 @@
 										break;
 								}
 								newSelectEl = previousEl.childNodes[position];
-							}/*else
-								if(state == "days")
-									selectDate.setDate(selectDate.getDate() - 7);*/
+							}
 							break;
 						case 40://down
 							var nextEl = parentEl.nextElementSibling,
@@ -631,28 +792,21 @@
 										break;
 								}
 								newSelectEl = nextEl.childNodes[position];
-							}/*else
-								if(state == "days")
-									selectDate.setDate(selectDate.getDate() + 7);*/
+							}
 							break;
 					}
-					if(newSelectEl == null && state == "days"){
-						ShowMonth(selectDate, (selectDate.getTime() < selectDate.getTime() ? "right" : "left"));
-						SelectDayByDate(selectDate);
-					}
-					else
-						if(newSelectEl != null){
-							newSelectEl.className += " select";
-							selectEl.className = selectEl.className.replace("select","");
-							if(state == "days")
-								SelectElement(newSelectEl);
-						}
+					if(newSelectEl != null)
+						if(state == "days")
+							SelectElement(newSelectEl);
+						else
+							SelectDayByElement(newSelectEl);
 				}
 			}
 		}
 	})
-/*}
+
+}
 
 window.addEventListener("load", function () {
 	Calendar();
-}, false);*/
+}, false);

@@ -14,21 +14,28 @@
 	outline: none;
 }
 
-body{
-	background: #e6e6e8;
-}
-
-input.calendar{
+input.calendar,
+input.help_input{
 	box-sizing: border-box;
 	width: 330px;
 	margin-bottom: 5px;
 	padding: 14px 17px;
-	background: #fff;
+	background: transparent;
 	color: #323439;
 	font-size: 18px;
 	font-family: Lato;
-	margin: 50px;	
 	border: none;
+	position: relative;
+	z-index: 100;
+}
+
+input.help_input{
+	position: absolute;
+	background: #fff;
+	top: -16px;
+	left: 0;
+	color: #bbb;
+	z-index: 10;
 }
 
 .wrapper_input_calendar{
@@ -47,6 +54,7 @@ input.calendar{
 	margin-top: -14px;
 	margin-right: -150px;
 	transition: background .5s ease;
+	z-index: 10000;
 }
 
 .wrapper_input_calendar label.button_show_calendar:hover{
@@ -209,6 +217,11 @@ input.calendar{
 	transition: box-shadow 0.3s ease, 
 				border-radius 0.3s ease,
 				background 0.3s ease;
+}
+
+.b-calendar .calendar td.month,
+.b-calendar .calendar td.year{
+	cursor: default;
 }
 
 .b-calendar .calendar td.month span,
