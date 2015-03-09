@@ -1,0 +1,4 @@
+[submodule "view"]
+	path = view
+	url = git@github.com:SlavikLutsenko/Calendar.git
+	branch = gh-pages
