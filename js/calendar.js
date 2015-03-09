@@ -49,7 +49,8 @@
 		inputDate = null,
 		state = "days",
 		number_showed = 0,
-		table = null;
+		table = null,
+		currentPosition = 0;
 
 	function GetPositionElement(el) {
 		var position = el.getBoundingClientRect();
@@ -65,7 +66,7 @@
 				return (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + "." + (date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1) + "." + date.getFullYear();
 				break;
 			case "full_words":
-				return date.getFullYear() + " " + months[date.getMonth()].name + " " + date.getDate();
+				return date.getFullYear() + " " + months[date.getMonth()].name + " " + (date.getDate() < 10 ? "0" + date.getDate() : date.getDate());
 				break;
 			default:
 				console.error("error format data");
@@ -435,6 +436,18 @@
 		}
 	}
 
+	function SelectCurrentPosition (el) {
+		el.setSelectionRange(currentPosition, currentPosition + 1);
+	}
+
+	function GetSelected (el) {
+		return el.value.substr(el.selectionStart, 1);
+	}
+
+	function ShowDate (style) {
+		inputDate.value = DateToString(selectDate, style);
+	}
+
 	CreateCalendar();
 
 	for (var i = 0; i < inputsDate.length; i++) {
@@ -452,39 +465,86 @@
 
 	document.body.addEventListener("click", function (e) {
 		var el = e.target;
-		while(el != document.body && el != calendar && el.className.search("select_calendar") == -1 && el.className.search("button_show_calendar") == -1)
+		while(el != document.body && el != calendar /*&& el.className.search("select_calendar") == -1*/ && el.className.search("button_show_calendar") == -1)
 			el = el.parentNode;
 		if(el == document.body)
 			HideCalendar();
 	}, true);
 
-	/* НУЖНО ДОДЕЛАТЬ!!!
 	for (var i = 0; i < inputsDate.length; i++) {
-		inputsDate[i].addEventListener("change", function () {
-	        selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-	        if(calendar.style.display != "none"){
-	        	if(selectDate.getMonth() != selectDate.getMonth() || selectDate.getFullYear() != selectDate.getFullYear()) 
-		            ShowMonth(selectDate, (selectDate.getFullYear() < selectDate.getFullYear() || selectDate.getMonth() < selectDate.getMonth() ? "right" : "left"));
-		        SelectDayByDate(selectDate);
-	        }
-	    }, false);
+		inputsDate[i].addEventListener("focus", function (e) {
+			inputDate = e.target;
+			selectDate = StringToDate(inputDate.value);
+			inputDate.value = DateToString(selectDate, "full_words");
+		}, false)
 
-	    inputsDate[i].addEventListener("focus", function (e) {
-	        var el = e.target;
-	    	inputDate = el;
-	    	selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-	        el.value = selectDate.toLocaleDateString();
-	    }, false);
+		inputsDate[i].addEventListener("blur", function (e) {
+			e.target.value = DateToString(selectDate, "words");
+			currentPosition = 0;
+		}, false)
 
-	    inputsDate[i].addEventListener("blur", function (e) {
-	        var el = e.target,
-	        	date = el.value.split(/\.|\s|\//);
-	    	selectDate = new Date(date[1] + "." + date[0] + "." + date[2]);
-	        el.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
-	    }, false);
+		inputsDate[i].addEventListener("click", function (e) {
+			SelectCurrentPosition(e.target);
+			e.preventDefault();
+		})
+
+		inputsDate[i].addEventListener("keydown", function (e) {
+			var el = e.target;
+			e.preventDefault();
+			if(currentPosition >= 0 && currentPosition <= 3){
+				//EnterYear(e);
+			}else if(currentPosition >= 5 && currentPosition < 5 + months[today.getMonth()].name.length){
+				//EnterMonth(e);
+			}else{
+				//input day
+			}
+			switch(e.keyCode){
+				case 37: //left
+					if(currentPosition > 0)
+						currentPosition--;
+					SelectCurrentPosition(el);
+					if(GetSelected(el) == " "){
+						if(currentPosition > 0)
+							currentPosition--;
+						SelectCurrentPosition(el);
+					}
+					break;
+				case 39: //right
+					if(currentPosition < el.value.length - 1)
+						currentPosition++;
+					SelectCurrentPosition(el);
+					if(GetSelected(el) == " "){
+						if(currentPosition < el.value.length)
+							currentPosition++;
+						SelectCurrentPosition(el);
+					}
+					break;
+					case 38://up
+						if(currentPosition >= 0 && currentPosition <= 3){
+							selectDate.setFullYear(selectDate.getFullYear() + 1);
+						}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+							selectDate.setMonth(selectDate.getMonth() + 1);
+							currentPosition = 5;
+						}else{
+							selectDate.setDate(selectDate.getDate() + 1);
+						}
+						break;
+					case 40://down
+						if(currentPosition >= 0 && currentPosition <= 3){
+							selectDate.setFullYear(selectDate.getFullYear() - 1);
+						}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+							selectDate.setMonth(selectDate.getMonth() - 1);
+							currentPosition = 5;
+						}else{
+							selectDate.setDate(selectDate.getDate() - 1);
+						}
+						break;
+			}
+			ShowDate("full_words");
+			SelectCurrentPosition(inputDate);
+		}, false)
 	};
 	
-	/*
 	for (var i = document.forms.length - 1; i >= 0; i--) {
 		document.forms[i].addEventListener("submit", function (e) {
 			var form = e.target,
@@ -494,8 +554,6 @@
 			};
 		}, false);
 	};
-	*/
-
 
 	controls.addEventListener("click", function (e) {
 		var el = e.target;
