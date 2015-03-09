@@ -64,6 +64,9 @@
 			case "number":
 				return (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + "." + (date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1) + "." + date.getFullYear();
 				break;
+			case "full_words":
+				return date.getFullYear() + " " + months[date.getMonth()].name + " " + date.getDate();
+				break;
 			default:
 				console.error("error format data");
 				break;
@@ -294,7 +297,11 @@
 		return years;
 	}
 
-	function ShowYears (startYear, finishYear, direction) {
+	function ShowYears (direction) {
+		var startYear, finishYear;
+		for(startYear = selectDate.getFullYear(); startYear % 16 != 0; startYear--);
+		for(finishYear = selectDate.getFullYear(); finishYear % 16 != 0; finishYear++);
+		finishYear--;
 		controls_date.innerText = startYear + " - " + finishYear;
 		var newtable = CreateYears(startYear, finishYear);
 		if(direction == "show"){
@@ -339,9 +346,10 @@
 				selectDate.setMonth(el.getAttribute("data-id_month"));
 				break;
 			case "years":
-				selectDate.setDate(el.getAttribute("data-number_year_month"));
+				selectDate.setFullYear(el.getAttribute("data-number_year_month"));
 				break;
 		}
+		inputDate.value = DateToString(selectDate, "words");
 	}
 
 	function SelectDayByElement (el) {
@@ -350,7 +358,6 @@
 			previousSelect.className = previousSelect.className.replace(/\s?select/, "");
 		el.className += " select";
 		ChangeSelectDateByElement(el);
-		inputDate.value = DateToString(selectDate, "words");
 	}
 
 	function SelectDayByDate (date) {
@@ -375,7 +382,8 @@
 			case "years":
 				var borders = controls_date.innerText.split(" - "),
 					multiplier = (direction == "left" ? -1 : 1);
-				ShowYears(Number(borders[0]) + 16*multiplier, Number(borders[1]) + 16*multiplier, direction);
+				selectDate.setFullYear(selectDate.getFullYear() + (direction == "left" ? -16 : 16));
+				ShowYears(direction);
 				break;
 		}
 	}
@@ -386,7 +394,7 @@
 				ShowMonths();
 				break;
 			case "months":
-				ShowYears(selectDate.getFullYear() - 7, selectDate.getFullYear() + 8, "show");
+				ShowYears("show");
 				break;
 		}
 	}
@@ -401,12 +409,14 @@
 			}
 			else SelectDayByElement(el);
 		}
-		if(el.tagName.toLowerCase() == "span" && el.getAttribute("data-id_month") != null){
-			selectDate.setMonth(el.getAttribute("data-id_month"));
+		if(el.tagName.toLowerCase() == "span")
+			el = el.parentNode;
+		if(el.getAttribute("data-id_month") != null){
+			ChangeSelectDateByElement(el);
 			ShowMonth(selectDate);
 		}
-		if(el.tagName.toLowerCase() == "span" && el.getAttribute("data-number_year_month") != null){
-			selectDate.setFullYear(el.getAttribute("data-number_year_month"));
+		if(el.getAttribute("data-number_year_month") != null){
+			ChangeSelectDateByElement(el);
 			ShowMonths();
 		}
 	}
@@ -495,6 +505,7 @@
 			HideCalendar();
 	}, true);
 
+	/* НУЖНО ДОДЕЛАТЬ!!!
 	for (var i = 0; i < inputsDate.length; i++) {
 		inputsDate[i].addEventListener("change", function () {
 	        selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
@@ -519,7 +530,8 @@
 	        el.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
 	    }, false);
 	};
-
+	
+	/*
 	for (var i = document.forms.length - 1; i >= 0; i--) {
 		document.forms[i].addEventListener("submit", function (e) {
 			var form = e.target,
@@ -529,6 +541,8 @@
 			};
 		}, false);
 	};
+	*/
+
 
 	controls.addEventListener("click", function (e) {
 		var el = e.target;
@@ -540,9 +554,9 @@
 
 	goToday.addEventListener("click", function(){
 		var flag = selectDate.getMonth() != today.getMonth() || selectDate.getFullYear() != today.getFullYear();
-		if(flag || state != "days")
-			ShowMonth(new Date(), (selectDate.getFullYear() < today.getFullYear() || selectDate.getMonth() < today.getMonth() ? "right" : "left"));
 		selectDate = new Date();
+		if(flag || state != "days")
+			ShowMonth(selectDate, (selectDate.getFullYear() < today.getFullYear() || selectDate.getMonth() < today.getMonth() ? "right" : "left"));
 		if(flag || state != "days")
 			setTimeout(function(){
 				SelectDayByDate(selectDate);
@@ -554,7 +568,7 @@
 	calendar.addEventListener("click", function (e) {
 		SelectElement(e.target);
 	}, false);
-
+/*
 	document.body.addEventListener("keyup", function (e) {
 		var el = e.target;
 		if(e.keyCode == 27 && calendar.style.display != "none")
@@ -618,9 +632,7 @@
 										break;
 								}
 								newSelectEl = previousEl.childNodes[position];
-							}/*else
-								if(state == "days")
-									selectDate.setDate(selectDate.getDate() - 7);*/
+							}
 							break;
 						case 40://down
 							var nextEl = parentEl.nextElementSibling,
@@ -631,9 +643,7 @@
 										break;
 								}
 								newSelectEl = nextEl.childNodes[position];
-							}/*else
-								if(state == "days")
-									selectDate.setDate(selectDate.getDate() + 7);*/
+							}
 							break;
 					}
 					if(newSelectEl == null && state == "days"){
@@ -651,6 +661,7 @@
 			}
 		}
 	})
+*/
 /*}
 
 window.addEventListener("load", function () {

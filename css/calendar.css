@@ -211,6 +211,11 @@ input.calendar{
 				background 0.3s ease;
 }
 
+.b-calendar .calendar td.month,
+.b-calendar .calendar td.year{
+	cursor: default;
+}
+
 .b-calendar .calendar td.month span,
 .b-calendar .calendar td.year span{
 	display: inline-block;
