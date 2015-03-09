@@ -1,8 +1,3 @@
-function GetPositionElement(el) {
-	var position = el.getBoundingClientRect();
-	return {top: position.top, left: position.left}
-}
-
 //function Calendar () {
 	var months = new Array(
 			{
@@ -49,7 +44,6 @@ function GetPositionElement(el) {
 		controls = document.createElement("div"),
 		controls_date = document.createElement("div"),
 		goToday = document.createElement("button"),
-		tempEl = document.createElement("div"),
 		today = new Date(),
 		currentData = new Date(),
 		selectDate = new Date(),
@@ -58,71 +52,65 @@ function GetPositionElement(el) {
 		number_showed = 0,
 		table = null;
 
-	tempEl.className = "button left";
-	controls.appendChild(tempEl);
-	controls_date.className = "button date";
-	controls.appendChild(controls_date);
-	tempEl = document.createElement("div");
-	tempEl.className = "button right";
-	controls.appendChild(tempEl);
-	controls.className = "b-controls";
-	calendar.appendChild(controls);
-	show_calendar.className = "show_calendar";
-	calendar.appendChild(show_calendar);
-	goToday.className = "goToday";
-	goToday.innerText = "Today";
-	calendar.appendChild(goToday);
-	calendar.className = "b-calendar";
-	calendar.style.display = "none";
-	document.body.appendChild(calendar);
+	function GetPositionElement(el) {
+		var position = el.getBoundingClientRect();
+		return {top: position.top, left: position.left}
+	}
 
-	for (var i = 0; i < inputsDate.length; i++) {
-		Wrapper(inputsDate[i]).addEventListener("click", function (e) {
-			if(e.target.previousElementSibling.className.search("select_calendar") == -1){
-				HideCalendar();
-				ShowCalendar(e.target.previousElementSibling);
-			}
-			else
-				HideCalendar();
-		}, false);
-	};
+	function DateToString (date, style) {
+		switch(style){
+			case "words":
+				return (date.getFullYear() != today.getFullYear() ? date.getFullYear() + " " : "") + months[date.getMonth()].name + " " + date.getDate();
+				break;
+			case "number":
+				return (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + "." + (date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1) + "." + date.getFullYear();
+				break;
+			default:
+				console.error("error format data");
+				break;
+		}
+	}
 
-	inputsDate = document.querySelectorAll("input.calendar");
+	function StringToDate (string) {
+		var els = string.split(".");
+		if(els.length == 1)
+			return new Date((string.split(" ").length == 2 ? today.getFullYear() + " " : "") + string);
+		return new Date(els[1] + "." + els[0] + "." + els[2]);
+	}
 
-	for (var i = 0; i < inputsDate.length; i++) {
-		inputsDate[i].addEventListener("change", function () {
-	        selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-	        if(calendar.style.display != "none"){
-	        	if(selectDate.getMonth() != currentData.getMonth() || selectDate.getFullYear() != currentData.getFullYear()) 
-		            ShowMonth(selectDate, (currentData.getFullYear() < selectDate.getFullYear() || currentData.getMonth() < selectDate.getMonth() ? "right" : "left"));
-		        SelectDayByDate(selectDate);
-	        }
-	    }, false);
+	function CreateCalendar(){
+		var tempEl = document.createElement("div");
+		tempEl.className = "button left";
+		controls.appendChild(tempEl);
+		controls_date.className = "button date";
+		controls.appendChild(controls_date);
+		tempEl = document.createElement("div");
+		tempEl.className = "button right";
+		controls.appendChild(tempEl);
+		controls.className = "b-controls";
+		calendar.appendChild(controls);
+		show_calendar.className = "show_calendar";
+		calendar.appendChild(show_calendar);
+		goToday.className = "goToday";
+		goToday.innerText = "Today";
+		calendar.appendChild(goToday);
+		calendar.className = "b-calendar";
+		calendar.style.display = "none";
+		document.body.appendChild(calendar);
+	}
 
-	    inputsDate[i].addEventListener("focus", function (e) {
-	        var el = e.target;
-	    	inputDate = el;
-	    	selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-	        el.value = selectDate.toLocaleDateString();
-	    }, false);
-
-	    inputsDate[i].addEventListener("blur", function (e) {
-	        var el = e.target,
-	        	date = el.value.split(/\.|\s|\//);
-	    	selectDate = new Date(date[1] + "." + date[0] + "." + date[2]);
-	        el.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
-	    }, false);
-	};
-
-	for (var i = document.forms.length - 1; i >= 0; i--) {
-		document.forms[i].addEventListener("submit", function (e) {
-			var form = e.target,
-				calendars = form.querySelectorAll("input.calendar");
-			for (var i = 0; i < calendars.length; i++) {
-				calendars[i].value = (new Date((calendars[i].value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + calendars[i].value)).toDateString();
-			};
-		}, false);
-	};
+	function CreateWrapper (el) {
+		var wrapper_input_calendar = document.createElement("span");
+		wrapper_input_calendar.className = "wrapper_input_calendar";
+		wrapper_input_calendar.innerHTML = el.outerHTML;
+		var button_show_calendar = document.createElement("label");
+		button_show_calendar.className = "button_show_calendar";
+		wrapper_input_calendar.appendChild(button_show_calendar);
+		el.parentNode.replaceChild(wrapper_input_calendar, el);
+		el = wrapper_input_calendar.querySelector("input.calendar");
+		el.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
+		return button_show_calendar;
+	}
 
 	function ShowCalendar (el) {
 		inputDate = el;
@@ -131,22 +119,20 @@ function GetPositionElement(el) {
 		calendar.style.top = position.top + 55 + "px";
 		calendar.style.left = position.left + "px";
 		calendar.style.display = "block";
-		selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
-		currentData = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+		selectDate = StringToDate(inputDate.value);
+		currentData = StringToDate(inputDate.value);
 		number_showed = 0;
 		ShowMonth(currentData);
 	}
 
-	function Wrapper (el) {
-		var wrapper_input_calendar = document.createElement("span");
-		wrapper_input_calendar.className = "wrapper_input_calendar";
-		wrapper_input_calendar.innerHTML = el.outerHTML;
-		var button_show_calendar = document.createElement("label");
-		wrapper_input_calendar.appendChild(button_show_calendar);
-		el.parentNode.replaceChild(wrapper_input_calendar, el);
-		el = wrapper_input_calendar.querySelector("input.calendar");
-		el.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
-		return button_show_calendar;
+	function HideCalendar () {
+		calendar.style.display = "none";
+		if(table != null)
+			show_calendar.removeChild(table);
+		table = null;
+		state = "days";
+		if(inputDate != null)
+			inputDate.className = inputDate.className.replace(/\s?select_calendar/, "");
 	}
 
 	function Transform (el, opacity, scale) {
@@ -160,8 +146,7 @@ function GetPositionElement(el) {
 			name_days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 		date = new Date(date);
 		date.setDate(1);
-		for (var i = 0, end = date.getDay() == 0 ? 7 : date.getDay(); i < end; i++)
-			date.setDate(date.getDate() - 1);
+		date.setDate(date.getDate() - (date.getDay() == 0 ? 7 : date.getDay()));
 		tableRow = document.createElement("tr");
 		for (var i = 0; i < name_days.length; i++) {
 			tableCell = document.createElement("th");
@@ -394,27 +379,6 @@ function GetPositionElement(el) {
 		}
 	}
 
-	controls.addEventListener("click", function (e) {
-		var el = e.target;
-		if(el.className.search("left") != -1 || el.className.search("right") != -1)
-			Move(el.className.search("left") != -1 ? "left" : "right");
-		if(el.className.search("date") != -1)
-			MoveUp();
-	}, false);
-
-	goToday.addEventListener("click", function(){
-		var flag = currentData.getMonth() != today.getMonth() || currentData.getFullYear() != today.getFullYear();
-		if(flag || state != "days")
-			ShowMonth(new Date(), (currentData.getFullYear() < today.getFullYear() || currentData.getMonth() < today.getMonth() ? "right" : "left"));
-		selectDate = new Date();
-		if(flag || state != "days")
-			setTimeout(function(){
-				SelectDayByDate(selectDate);
-			}, 300);
-		else
-			SelectDayByDate(selectDate);
-	}, false);
-
 	function SelectElement (el) {
 		if(el.tagName.toLowerCase() == "td" && el.className.search("day") != -1){
 			if(el.className.search("other_month") != -1){
@@ -434,29 +398,6 @@ function GetPositionElement(el) {
 			ShowMonths();
 		}
 	}
-
-	calendar.addEventListener("click", function (e) {
-		SelectElement(e.target);
-	}, false);
-	
-	function HideCalendar () {
-		calendar.style.display = "none";
-		if(table != null)
-			show_calendar.removeChild(table);
-		table = null;
-		state = "days";
-		var select_calendar = document.querySelector(".select_calendar");
-		if(select_calendar != null)
-			select_calendar.className = select_calendar.className.replace(/\s?select_calendar/, "");
-	}
-
-	document.body.addEventListener("click", function (e) {
-		var el = e.target;
-		while(el != document.body && el != calendar && el.className.search("select_calendar") == -1)
-			el = el.parentNode;
-		if(el == document.body)
-			HideCalendar();
-	}, true);
 
 	function ChangeSelectDate (direction) {
 		switch(direction){
@@ -518,6 +459,89 @@ function GetPositionElement(el) {
 				break;
 		}
 	}
+
+	CreateCalendar();
+
+	for (var i = 0; i < inputsDate.length; i++) {
+		CreateWrapper(inputsDate[i]).addEventListener("click", function (e) {
+			if(e.target.previousElementSibling.className.search("select_calendar") == -1){
+				HideCalendar();
+				ShowCalendar(e.target.previousElementSibling);
+			}
+			else
+				HideCalendar();
+		}, false);
+	};
+
+	inputsDate = document.querySelectorAll("input.calendar");
+
+	document.body.addEventListener("click", function (e) {
+		var el = e.target;
+		while(el != document.body && el != calendar && el.className.search("select_calendar") == -1 && el.className.search("button_show_calendar") == -1)
+			el = el.parentNode;
+		if(el == document.body)
+			HideCalendar();
+	}, true);
+
+	for (var i = 0; i < inputsDate.length; i++) {
+		inputsDate[i].addEventListener("change", function () {
+	        selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+	        if(calendar.style.display != "none"){
+	        	if(selectDate.getMonth() != currentData.getMonth() || selectDate.getFullYear() != currentData.getFullYear()) 
+		            ShowMonth(selectDate, (currentData.getFullYear() < selectDate.getFullYear() || currentData.getMonth() < selectDate.getMonth() ? "right" : "left"));
+		        SelectDayByDate(selectDate);
+	        }
+	    }, false);
+
+	    inputsDate[i].addEventListener("focus", function (e) {
+	        var el = e.target;
+	    	inputDate = el;
+	    	selectDate = new Date((inputDate.value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + inputDate.value);
+	        el.value = selectDate.toLocaleDateString();
+	    }, false);
+
+	    inputsDate[i].addEventListener("blur", function (e) {
+	        var el = e.target,
+	        	date = el.value.split(/\.|\s|\//);
+	    	selectDate = new Date(date[1] + "." + date[0] + "." + date[2]);
+	        el.value = (selectDate.getFullYear() != today.getFullYear() ? selectDate.getFullYear() + " " : "") + months[selectDate.getMonth()].name + " " + selectDate.getDate();
+	    }, false);
+	};
+
+	for (var i = document.forms.length - 1; i >= 0; i--) {
+		document.forms[i].addEventListener("submit", function (e) {
+			var form = e.target,
+				calendars = form.querySelectorAll("input.calendar");
+			for (var i = 0; i < calendars.length; i++) {
+				calendars[i].value = (new Date((calendars[i].value.split(/\.|\s|\//).length == 3 ? "" : today.getFullYear() + " ") + calendars[i].value)).toDateString();
+			};
+		}, false);
+	};
+
+	controls.addEventListener("click", function (e) {
+		var el = e.target;
+		if(el.className.search("left") != -1 || el.className.search("right") != -1)
+			Move(el.className.search("left") != -1 ? "left" : "right");
+		if(el.className.search("date") != -1)
+			MoveUp();
+	}, false);
+
+	goToday.addEventListener("click", function(){
+		var flag = currentData.getMonth() != today.getMonth() || currentData.getFullYear() != today.getFullYear();
+		if(flag || state != "days")
+			ShowMonth(new Date(), (currentData.getFullYear() < today.getFullYear() || currentData.getMonth() < today.getMonth() ? "right" : "left"));
+		selectDate = new Date();
+		if(flag || state != "days")
+			setTimeout(function(){
+				SelectDayByDate(selectDate);
+			}, 300);
+		else
+			SelectDayByDate(selectDate);
+	}, false);
+
+	calendar.addEventListener("click", function (e) {
+		SelectElement(e.target);
+	}, false);
 
 	document.body.addEventListener("keyup", function (e) {
 		var el = e.target;
@@ -615,6 +639,8 @@ function GetPositionElement(el) {
 			}
 		}
 	})
-//}
+/*}
 
-//Calendar();
+window.addEventListener("load", function () {
+	Calendar();
+}, false);*/
