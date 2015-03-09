@@ -18,17 +18,27 @@ body{
 	background: #e6e6e8;
 }
 
-input.calendar{
+input.calendar,
+input.help_input{
 	box-sizing: border-box;
 	width: 330px;
 	margin-bottom: 5px;
 	padding: 14px 17px;
-	background: #fff;
+	background: transparent;
 	color: #323439;
 	font-size: 18px;
 	font-family: Lato;
 	margin: 50px;	
 	border: none;
+}
+
+input.help_input{
+	position: absolute;
+	background: #fff;
+	top: -68px;
+	left: 0;
+	color: #bbb;
+	z-index: -9999;
 }
 
 .wrapper_input_calendar{

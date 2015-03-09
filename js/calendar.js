@@ -39,6 +39,7 @@
 			}
 		),
 		inputsDate = document.querySelectorAll("input.calendar"),
+		help_input = null,
 		calendar = document.createElement("div"),
 		show_calendar = document.createElement("div"),
 		controls = document.createElement("div"),
@@ -50,7 +51,11 @@
 		state = "days",
 		number_showed = 0,
 		table = null,
-		currentPosition = 0;
+		currentPosition = 0,
+		nameMonth = "",
+		numberMonth = -1,
+		position = 1,
+		editMonth = false;
 
 	function GetPositionElement(el) {
 		var position = el.getBoundingClientRect();
@@ -109,6 +114,9 @@
 		var button_show_calendar = document.createElement("label");
 		button_show_calendar.className = "button_show_calendar";
 		wrapper_input_calendar.appendChild(button_show_calendar);
+		help_input = document.createElement("input");
+		help_input.className = "help_input";
+		wrapper_input_calendar.appendChild(help_input);
 		el.parentNode.replaceChild(wrapper_input_calendar, el);
 		el = wrapper_input_calendar.querySelector("input.calendar");
 		el.value = months[selectDate.getMonth()].name + " " + selectDate.getDate();
@@ -459,7 +467,7 @@
 	}
 
 	function SelectCurrentPosition (el) {
-		el.setSelectionRange(currentPosition, currentPosition + 1);
+		el.setSelectionRange(currentPosition, currentPosition);
 	}
 
 	function GetSelected (el) {
@@ -490,6 +498,84 @@
 		}
 	}
 
+	function EnterMonth (key) {
+		var updataDate = false;
+		if((key.keyCode >= 65 && key.keyCode <= 90) || (key.keyCode >= 97 && key.keyCode <= 122)){
+			nameMonth += String.fromCharCode(key.keyCode).toLowerCase();
+			var	flag = false;
+			for (var i = 0; i < months.length && !flag; i++) {
+				if(months[i].name.substr(0, position).toLowerCase() == nameMonth.toLowerCase()){
+					editMonth = true;
+					flag = true;
+					position++;
+					numberMonth = i;
+				}
+			};
+			if(!flag){
+				nameMonth = nameMonth.substr(0, position - 1);
+			}
+			else{
+				if(nameMonth.length == 1) 
+					nameMonth = nameMonth.toUpperCase();
+				currentPosition++;
+			}
+		}else if(help_input.value!= ""){
+			switch(key.keyCode){
+				case 8: //backspace
+					if(position > 1)
+						position--;
+					nameMonth = nameMonth.substr(0, position - 1);
+					currentPosition--;
+					break;
+				case 9: //tab
+				case 32://space
+				case 39://right
+					nameMonth = help_input.value.split(" ")[1];
+					position = 1;
+					updataDate = true;
+					break;
+				case 38: //up
+					for (var i = numberMonth - 1; i >= 0; i--) {
+						if(months[i].name.substr(0, position - 1).toLowerCase() == nameMonth.toLowerCase()){
+							numberMonth = i;
+							break;
+						}
+					};
+					break;
+				case 40: //down
+					for (var i = numberMonth + 1; i < months.length; i++) {
+						if(months[i].name.substr(0, position - 1).toLowerCase() == nameMonth.toLowerCase()){
+							numberMonth = i;
+							break;
+						}
+					};
+					break;
+			}
+		}
+		if(editMonth){
+			if(!updataDate)
+				ShowHelpNameMonth();
+			else{
+				ShowHelpNameMonth();
+				selectDate = StringToDate(inputDate.value);
+				ShowDate("full_words");
+				help_input.value = "";
+				currentPosition = inputDate.value.length - 2;
+				editMonth = false;
+			}
+		}
+	}
+
+	function ShowHelpNameMonth () {
+		help_input.value = selectDate.getFullYear() + " " + months[numberMonth].name;
+		inputDate.value = selectDate.getFullYear() + " " + nameMonth;
+		for (var i = 0; i < months[numberMonth].name.length - nameMonth.length + 7; i++) {
+			inputDate.value += " ";
+		};
+		inputDate.value += " " + (selectDate.getDate() < 10 ? "0" + selectDate.getDate() : selectDate.getDate());
+		console.log(inputDate.value);
+	}
+
 	CreateCalendar();
 
 	for (var i = 0; i < inputsDate.length; i++) {
@@ -518,11 +604,17 @@
 			inputDate = e.target;
 			selectDate = StringToDate(inputDate.value);
 			inputDate.value = DateToString(selectDate, "full_words");
+			help_input = inputDate.nextElementSibling.nextElementSibling;
 		}, false)
 
 		inputsDate[i].addEventListener("blur", function (e) {
 			e.target.value = DateToString(selectDate, "words");
 			currentPosition = 0;
+			nameMonth = "";
+			numberMonth = -1;
+			position = 1;
+			help_input.value = "";
+			editMonth = false;
 		}, false)
 
 		inputsDate[i].addEventListener("click", function (e) {
@@ -535,18 +627,25 @@
 			e.preventDefault();
 			if(currentPosition >= 0 && currentPosition <= 3){
 				EnterYear(e);
-			}else if(currentPosition >= 5 && currentPosition < 5 + months[today.getMonth()].name.length){
-				//EnterMonth(e);
+				ShowDate("full_words");
+			}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+				EnterMonth(e);
 			}else{
 				EnterDay(e);
+				ShowDate("full_words");
 			}
-			switch(e.keyCode){
-				case 37: //left
-					DicCurrentPosition(inputDate);
-					break;
-				case 39: //right
-					IncCurrentPosition(inputDate);
-					break;
+			if(help_input.value == ""){
+				switch(e.keyCode){
+					case 37: //left
+						DicCurrentPosition(inputDate);
+						if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length)
+							currentPosition = 5;
+						break;
+					case 39: //right
+						IncCurrentPosition(inputDate);
+						if(currentPosition > 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length)
+							currentPosition = inputDate.value.length - 2;
+						break;
 					case 38://up
 						if(currentPosition >= 0 && currentPosition <= 3){
 							selectDate.setFullYear(selectDate.getFullYear() + 1);
@@ -556,6 +655,7 @@
 						}else{
 							selectDate.setDate(selectDate.getDate() + 1);
 						}
+						ShowDate("full_words");
 						break;
 					case 40://down
 						if(currentPosition >= 0 && currentPosition <= 3){
@@ -566,9 +666,17 @@
 						}else{
 							selectDate.setDate(selectDate.getDate() - 1);
 						}
+						ShowDate("full_words");
 						break;
+					case 9: //tab
+						if(currentPosition >= 0 && currentPosition <= 3){
+							currentPosition = 5
+						}else if(currentPosition >= 5 && currentPosition < 5 + months[selectDate.getMonth()].name.length){
+							currentPosition = inputDate.value.length - 2;
+						}
+						break;
+				}
 			}
-			ShowDate("full_words");
 			SelectCurrentPosition(inputDate);
 		}, false)
 	};
