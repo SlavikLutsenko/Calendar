@@ -490,11 +490,15 @@ function Calendar () {
 		if(key.keyCode >= 48 && key.keyCode <= 57){
 			inputDate.value = inputDate.value.substr(0, currentPosition) + String.fromCharCode(key.keyCode) + inputDate.value.substring(currentPosition + 1, inputDate.value.length);
 			var number = Number(inputDate.value.substring(inputDate.value.length - 2, inputDate.value.length));
+			console.log(number);
 			if(number > months[selectDate.getMonth()].day)
 				number = months[selectDate.getMonth()].day;
+			if(number == 0)
+				number = 1;
 			inputDate.value = inputDate.value.substring(0, inputDate.value.length - 2) + number;
-			IncCurrentPosition(inputDate);
 			selectDate = StringToDate(inputDate.value);
+			ShowDate("full_words");
+			IncCurrentPosition(inputDate);
 		}
 	}
 
