@@ -58,8 +58,12 @@ function Calendar () {
 		editMonth = false;
 
 	function GetPositionElement(el) {
-		var position = el.getBoundingClientRect();
-		return {top: position.top, left: position.left}
+	    var position = el.getBoundingClientRect(),
+	    	scrollTop = window.pageYOffset,
+	    	scrollLeft = window.pageXOffset,
+	    	clientTop = document.documentElement.clientTop || document.body.clientTop || 0,
+	    	clientLeft = document.documentElement.clientLeft || document.body.clientLeft || 0;
+		return {top: position.top +  scrollTop - clientTop, left: position.left + scrollLeft - clientLeft}
 	}
 
 	function DateToString (date, style) {
