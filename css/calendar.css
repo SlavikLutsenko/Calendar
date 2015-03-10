@@ -32,10 +32,10 @@ input.help_input{
 input.help_input{
 	position: absolute;
 	background: #fff;
-	top: -16px;
+	top: -18px;
 	left: 0;
 	color: #bbb;
-	z-index: 10;
+	z-index: 99;
 }
 
 .wrapper_input_calendar{
@@ -54,7 +54,7 @@ input.help_input{
 	margin-top: -14px;
 	margin-right: -150px;
 	transition: background .5s ease;
-	z-index: 10000;
+	z-index: 101;
 }
 
 .wrapper_input_calendar label.button_show_calendar:hover{
@@ -173,6 +173,7 @@ input.help_input{
 }
 
 .b-calendar .calendar{
+	border: none !important;
 	width: 270px;
 	position: absolute;
 	top: 50px;
@@ -204,6 +205,7 @@ input.help_input{
 
 .b-calendar .calendar td,
 .b-calendar .calendar th{
+	border: none !important;
 	padding: 4px;
 	width: 30px;
 	height: 30px;

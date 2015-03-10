@@ -58,8 +58,12 @@ function Calendar () {
 		editMonth = false;
 
 	function GetPositionElement(el) {
-		var position = el.getBoundingClientRect();
-		return {top: position.top, left: position.left}
+	    var position = el.getBoundingClientRect(),
+	    	scrollTop = window.pageYOffset,
+	    	scrollLeft = window.pageXOffset,
+	    	clientTop = document.documentElement.clientTop || document.body.clientTop || 0,
+	    	clientLeft = document.documentElement.clientLeft || document.body.clientLeft || 0;
+		return {top: position.top +  scrollTop - clientTop, left: position.left + scrollLeft - clientLeft}
 	}
 
 	function DateToString (date, style) {
@@ -490,11 +494,15 @@ function Calendar () {
 		if(key.keyCode >= 48 && key.keyCode <= 57){
 			inputDate.value = inputDate.value.substr(0, currentPosition) + String.fromCharCode(key.keyCode) + inputDate.value.substring(currentPosition + 1, inputDate.value.length);
 			var number = Number(inputDate.value.substring(inputDate.value.length - 2, inputDate.value.length));
+			console.log(number);
 			if(number > months[selectDate.getMonth()].day)
 				number = months[selectDate.getMonth()].day;
+			if(number == 0)
+				number = 1;
 			inputDate.value = inputDate.value.substring(0, inputDate.value.length - 2) + number;
-			IncCurrentPosition(inputDate);
 			selectDate = StringToDate(inputDate.value);
+			ShowDate("full_words");
+			IncCurrentPosition(inputDate);
 		}
 	}
 
@@ -617,7 +625,8 @@ function Calendar () {
 			editMonth = false;
 		}, false)
 
-		inputsDate[i].addEventListener("click", function (e) {
+		inputsDate[i].addEventListener("mousedown", function (e) {
+			e.target.focus();
 			SelectCurrentPosition(e.target);
 			e.preventDefault();
 		})
