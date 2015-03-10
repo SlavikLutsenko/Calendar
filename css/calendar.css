@@ -173,6 +173,7 @@ input.help_input{
 }
 
 .b-calendar .calendar{
+	border: none !important;
 	width: 270px;
 	position: absolute;
 	top: 50px;
@@ -204,6 +205,7 @@ input.help_input{
 
 .b-calendar .calendar td,
 .b-calendar .calendar th{
+	border: none !important;
 	padding: 4px;
 	width: 30px;
 	height: 30px;
