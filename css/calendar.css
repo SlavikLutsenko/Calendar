@@ -18,12 +18,11 @@ input.calendar,
 input.help_input{
 	box-sizing: border-box;
 	width: 330px;
-	margin-bottom: 5px;
 	padding: 14px 17px;
 	background: transparent;
 	color: #323439;
-	font-size: 18px;
-	font-family: Lato;
+	font-size: 18px !important;
+	font-family: Lato !important;
 	border: none;
 	position: relative;
 	z-index: 100;
@@ -32,7 +31,7 @@ input.help_input{
 input.help_input{
 	position: absolute;
 	background: #fff;
-	top: -18px;
+	top: -12px;
 	left: 0;
 	color: #bbb;
 	z-index: 99;
