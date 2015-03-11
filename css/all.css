@@ -76,3 +76,16 @@ span.button:after{
 	border-radius: 5px;
 	display: inline-block;
 }
+
+ol{
+	overflow: hidden;
+}
+
+.right{
+	float: right;
+}
+
+.text{
+	display: inline-block;
+	padding: 30px;
+}
